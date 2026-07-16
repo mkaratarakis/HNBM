@@ -4,118 +4,106 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Michail Karatarakis
 -/
 import HopfieldNet.CReals.API.Basic
-import Mathlib.Data.Matrix.Reflection
-import Mathlib.Tactic.FinCases
 
 /-!
-# The Hopfield-network test (`HNtest`), executable over computable reals
+# Non-orthogonal Hebbian learning, executable over computable reals
 
-The `ℚ` test builds a 4-neuron Hopfield network with Hebbian weights from
-the patterns `[1,1,-1,-1]` and `[-1,1,-1,1]`, stabilizes the initial state
-`[1,-1,-1,1]` under the cyclic update sequence and reports the stable state
-(`[-1,1,-1,1]`) and the number of steps to convergence (`2`).
+The `FastReal` twin of `HopfieldNet/Quiver/HN/test.lean`, which exercises the
+**non-orthogonal** Hebbian decomposition: for patterns `pᵢ ∈ {±1}^U`, the
+Hebbian field on pattern `pⱼ` splits as
 
-This file performs the same computation over `FastReal`, on the Quiver-based
-`NeuralNetwork` structure of this repository. Since a decidable order on
-computable reals cannot exist, stabilization is fuel-based (`API.stabilizeF`)
-and returns a certificate that stability was *decided* (every comparison
-returned `some _`), not assumed.
+- **signal**: `(|U| - m) pⱼ`
+- **interference**: `disturbanceTerm ps j`
 
-Unlike `ℚ`'s `HopfieldNetwork` (whose `pact` is `act = 1 ∨ act = -1`), `pact`
-here is trivial: this structure's `hpact` quantifies over an arbitrary
-current activation, which the fuel-exhaustion fallback of `signStep` returns.
-The runs below certify the fallback is never taken, so all activations do
-remain `±1` — as facts about the run, not as a type-level invariant.
+with no orthogonality assumption.
+
+`HopfieldNetwork R U` requires `[Field R] [LinearOrder R]
+[IsStrictOrderedRing R]`, which computable reals cannot provide (`FastReal`
+is ball arithmetic — it has no `AddCommMonoid`, let alone a decidable
+order), so the `ℚ` file's `State`s and `Matrix` algebra are re-expressed as
+plain `Fin 4 → FastReal` activation vectors and folds; `±1`-ness of the
+patterns is by construction rather than a `pact` proof.
+
+The `ℚ` file's *theorem* `test_nonorthogonal_decomposition` (an instance of
+`patterns_pairwise_non_orthogonal`) cannot be transplanted as a theorem —
+its statement lives in the ordered-field world. Its twin here is an
+executable **certificate**: both sides of the decomposition are computed
+over `FastReal` and compared componentwise with the fueled `eqF`. The
+equalities are *decided* (not approximated): with `±1` patterns and integer
+weights every ball stays an exact dyadic point, so the exact-point branch of
+`FastReal.compare` settles each comparison at the first probe.
 -/
 
 open Computable.Fast Computable.Fast.API
 
+-- `#eval` code generation unfolds the `FastReal` ball arithmetic, which is
+-- much deeper than the `ℚ` original's.
+set_option maxRecDepth 4096
+
 namespace Computable.Fast.API.HNtest
 
-/-- Hopfield network over `FastReal` on `n` neurons: complete graph, `±1`
-activations, fueled sign-threshold activation `signStep` with threshold
-`θ` (the single entry of the `κ2 = 1` parameter vector). -/
-abbrev HopfieldFast (n : ℕ) [NeZero n] : NeuralNetwork FastReal (Fin n) FastReal where
-  Hom u v := PLift (u ≠ v)
-  Ui := Set.univ
-  Uo := Set.univ
-  Uh := ∅
-  hU := by simp
-  hUi := Ne.symm Set.empty_ne_univ
-  hUo := Ne.symm Set.empty_ne_univ
-  hhio := Set.empty_inter _
-  κ1 _ := 0
-  κ2 _ := 1
-  fnet _ w pred _ := (List.finRange n).foldl (fun acc v => acc + w v * pred v) 0
-  fact _ curr net θv := signStep curr net (θv.get 0)
-  fout _ act := act
-  m act := act
-  pact _ := True
-  pw _ _ _ := True
-  pm _ := True
-  hpact := by intros; trivial
+/-! ### `Matrix` algebra over `FastReal`, as folds -/
 
-/-- Hebbian weight matrix over `FastReal`: `w u v = ∑ j, ps j u * ps j v`
-off the diagonal, `0` on it (as in the `ℚ` `Hebbian`, whose diagonal
-subtraction zeroes self-weights). -/
+/-- Twin of `Matrix.dotProduct`. -/
+def dotF {n : ℕ} (x y : Fin n → FastReal) : FastReal :=
+  (List.finRange n).foldl (fun acc v => acc + x v * y v) 0
+
+/-- Twin of `Matrix.mulVec`. -/
+def mulVecF {n : ℕ} (w : Matrix (Fin n) (Fin n) FastReal) (x : Fin n → FastReal) :
+    Fin n → FastReal :=
+  fun u => dotF (w u) x
+
+/-- Twin of `(Hebbian ps).w = ∑ k, pₖ pₖᵀ - m • 1`, componentwise: for `±1`
+patterns the diagonal is `∑ k, pₖ(u)² - m = 0`, and off the diagonal the
+`- m • 1` term vanishes, leaving `∑ k, pₖ(u) pₖ(v)`. -/
 def hebbW {m n : ℕ} (ps : Fin m → Fin n → FastReal) :
     Matrix (Fin n) (Fin n) FastReal := fun u v =>
   if u = v then 0
-  else (List.finRange m).foldl (fun acc j => acc + ps j u * ps j v) 0
+  else (List.finRange m).foldl (fun acc k => acc + ps k u * ps k v) 0
 
-/-- Hebbian parameters (thresholds `0`) for `HopfieldFast n`. -/
-def hebbParams {m n : ℕ} [NeZero n] (ps : Fin m → Fin n → FastReal) :
-    Params (HopfieldFast n) where
-  h_arrows _ _ _ := trivial
-  w := hebbW ps
-  σ _ := Vector.emptyWithCapacity 0
-  θ _ := ⟨#[0], rfl⟩
-  hw u v h := by
-    have huv : u = v := not_not.mp (fun hne => h ⟨⟨hne⟩, trivial⟩)
-    subst huv
-    unfold hebbW
-    rw [if_pos rfl]
-    rfl
-  hw' := trivial
+/-- Twin of `disturbanceTerm`: the interference
+`∑ i ≠ j, pᵢ(u) ⬝ ⟪pᵢ, pⱼ⟫` felt by pattern `pⱼ` at neuron `u`. -/
+def disturbanceTermF {m n : ℕ} (ps : Fin m → Fin n → FastReal) (j : Fin m) :
+    Fin n → FastReal := fun u =>
+  (List.finRange m).foldl
+    (fun acc i => if i ≠ j then acc + ps i u * dotF (ps i) (ps j) else acc) 0
 
-/-- The two stored patterns of the `ℚ` test: `[1,1,-1,-1]` and `[-1,1,-1,1]`. -/
-def ps : Fin 2 → Fin 4 → FastReal := ![![1, 1, -1, -1], ![-1, 1, -1, 1]]
+/-! ### The two non-orthogonal patterns -/
 
-/-- The test parameters: Hebbian weights from `ps`. -/
-def pH : Params (HopfieldFast 4) := hebbParams ps
+-- Two genuinely non-orthogonal patterns in `{±1}^(Fin 4)` over `FastReal`.
+def pat0 : Fin 4 → FastReal := fun _ => 1
 
-/-- Initial state `[1,-1,-1,1]`, as in the `ℚ` test. -/
-def extu : (HopfieldFast 4).State where
-  act := ![1, -1, -1, 1]
-  hp _ := trivial
+def pat1 : Fin 4 → FastReal := fun i => if i = 0 then -1 else 1
 
-/-! ## The computations
+-- Package patterns as a `Fin 2 → (Fin 4 → FastReal)` family.
+def ps_nonorth : Fin 2 → Fin 4 → FastReal := ![pat0, pat1]
 
-The `ℚ` originals are
-`#eval HopfieldNet_stabilize test_params extu (useq_Fin 4) …` (stable state
-`[-1, 1, -1, 1]`) and `#eval HopfieldNet_conv_time_steps …` (`2`).
--/
+-- The overlap is non-zero (here it is `2`).
+#eval dotF pat0 pat1
 
-/-- The stabilization run: `(final state, steps, certified-stable)`. -/
-def run : (HopfieldFast 4).State × ℕ × Bool := stabilizeF pH 64 extu
+-- A concrete interference value (non-zero, here `2`).
+#eval disturbanceTermF ps_nonorth (1 : Fin 2) (0 : Fin 4)
 
--- The stable state, as integers: expect `some [-1, 1, -1, 1]`.
-#eval actsToInts run.1.act
+/-! ### The decomposition, certified executably -/
 
--- The stable state, as balls.
-#eval List.ofFn run.1.act
+/-- Executable twin of the `ℚ` theorem `test_nonorthogonal_decomposition`:
+`(Hebbian ps).w *ᵥ p₁ = (card (Fin 4) - 2) • p₁ + disturbanceTerm ps 1`,
+checked componentwise with the fueled `eqF`. `some true` means every
+component was *decided* equal (no comparison ran out of fuel). -/
+def test_nonorthogonal_decomposition : Option Bool :=
+  (List.finRange 4).foldl
+    (fun acc u => do
+      let b ← acc
+      let e ← eqF (mulVecF (hebbW ps_nonorth) pat1 u)
+        (((4 : FastReal) - 2) * pat1 u + disturbanceTermF ps_nonorth (1 : Fin 2) u)
+      pure (b && e))
+    (some true)
 
--- Steps to convergence (twin of `HopfieldNet_conv_time_steps`): expect `2`.
-#eval run.2.1
+-- The decomposition holds, decidedly so: expect `some true`.
+#eval test_nonorthogonal_decomposition
 
--- Certificate: stability was *decided* (no comparison ran out of fuel): expect `true`.
-#eval run.2.2
-
--- Sanity: the initial state is provably not stable, decidedly so.
-#eval isStableF pH extu  -- expect `some false`
-
--- Each stored pattern is a fixed point of the dynamics: expect `some true` twice.
-#eval isStableF pH ⟨![1, 1, -1, -1], fun _ => trivial⟩
-#eval isStableF pH ⟨![-1, 1, -1, 1], fun _ => trivial⟩
+-- The Hebbian field on `p₁` (twin of `#eval (Hebbian ps).w.mulVec p₁`;
+-- the `ℚ` value is `![0, 4, 4, 4]`).
+#eval mulVecF (hebbW ps_nonorth) pat1
 
 end Computable.Fast.API.HNtest
