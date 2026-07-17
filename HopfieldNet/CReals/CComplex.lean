@@ -94,11 +94,65 @@ instance : CommRing CComplex where
   mul_one := by intros; ext <;> simp
   mul_comm := by intros; ext <;> simp <;> ring
 
+instance : Nontrivial CComplex :=
+  ⟨⟨0, 1, fun h => zero_ne_one (congrArg re h)⟩⟩
+
 theorem I_mul_I : I * I = -1 := by
   ext <;> simp
 
 theorem mul_conj (z : CComplex) : z * conj z = ofReal (normSq z) := by
   ext <;> simp [normSq, mul_comm]
+
+theorem ofReal_injective : Function.Injective ofReal := by
+  intro x y h
+  simpa using congrArg re h
+
+/-! ### `re`/`im` as additive homs, sums -/
+
+/-- The real part as an additive monoid hom. -/
+def reAddHom : CComplex →+ CReal where
+  toFun := re
+  map_zero' := rfl
+  map_add' := fun _ _ => rfl
+
+/-- The imaginary part as an additive monoid hom. -/
+def imAddHom : CComplex →+ CReal where
+  toFun := im
+  map_zero' := rfl
+  map_add' := fun _ _ => rfl
+
+@[simp] theorem reAddHom_apply (z : CComplex) : reAddHom z = z.re := rfl
+@[simp] theorem imAddHom_apply (z : CComplex) : imAddHom z = z.im := rfl
+
+theorem re_sum {ι : Type*} (s : Finset ι) (f : ι → CComplex) :
+    (∑ x ∈ s, f x).re = ∑ x ∈ s, (f x).re :=
+  map_sum reAddHom f s
+
+theorem im_sum {ι : Type*} (s : Finset ι) (f : ι → CComplex) :
+    (∑ x ∈ s, f x).im = ∑ x ∈ s, (f x).im :=
+  map_sum imAddHom f s
+
+/-! ### `normSq` lemmas -/
+
+@[simp] theorem normSq_zero : normSq (0 : CComplex) = 0 := by
+  show (0 : CReal) * 0 + 0 * 0 = 0; simp
+
+@[simp] theorem normSq_one : normSq (1 : CComplex) = 1 := by
+  show (1 : CReal) * 1 + 0 * 0 = 1; simp
+
+@[simp] theorem normSq_I : normSq I = 1 := by
+  show (0 : CReal) * 0 + 1 * 1 = 1; simp
+
+@[simp] theorem normSq_conj (z : CComplex) : normSq (conj z) = normSq z := by
+  simp only [normSq, conj_re, conj_im]; ring
+
+@[simp] theorem normSq_ofReal (x : CReal) : normSq (ofReal x) = x * x := by
+  simp only [normSq, ofReal_re, ofReal_im]; ring
+
+/-- `normSq` is multiplicative — for photonics: probabilities compose under
+sequential (matrix) evolution. -/
+theorem normSq_mul (z w : CComplex) : normSq (z * w) = normSq z * normSq w := by
+  simp only [normSq, mul_re, mul_im]; ring
 
 /-- `ofReal` as a ring homomorphism. -/
 def ofRealRingHom : CReal →+* CComplex where
@@ -107,6 +161,20 @@ def ofRealRingHom : CReal →+* CComplex where
   map_mul' := by intros; ext <;> simp
   map_zero' := rfl
   map_add' := by intros; ext <;> simp
+
+@[simp] theorem ofRealRingHom_apply (x : CReal) : ofRealRingHom x = ofReal x := rfl
+
+/-- `CComplex` is a (computable) `CReal`-algebra via `ofReal`. -/
+instance : Algebra CReal CComplex := ofRealRingHom.toAlgebra
+
+@[simp] theorem algebraMap_eq (x : CReal) :
+    algebraMap CReal CComplex x = ofReal x := rfl
+
+@[simp] theorem smul_re (x : CReal) (z : CComplex) : (x • z).re = x * z.re := by
+  rw [Algebra.smul_def]; simp
+
+@[simp] theorem smul_im (x : CReal) (z : CComplex) : (x • z).im = x * z.im := by
+  rw [Algebra.smul_def]; simp
 
 /-- Conjugation as a ring homomorphism. -/
 def conjRingHom : CComplex →+* CComplex where

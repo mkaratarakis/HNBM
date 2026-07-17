@@ -128,7 +128,7 @@ def beamSplitter : FastMatrix 2 2 :=
 /-- Phase shifter by `φ` on the second mode: `[[1, 0], [0, e^{iφ}]]`. -/
 def phaseShifter (φ : FastReal) : FastMatrix 2 2 :=
   ![![1, 0],
-    ![0, FastComplex.exp ⟨0, φ⟩]]
+    ![0, FastComplex.phase φ]]
 
 /-- Mach–Zehnder interferometer: beam splitter, phase `φ`, beam splitter. -/
 def mzi (φ : FastReal) : FastMatrix 2 2 :=

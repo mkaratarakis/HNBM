@@ -78,6 +78,41 @@ theorem mem_unitaryGroup_iff_map {k : ℕ} (A : CMatrix k) :
     refine toComplexMatrixHom_injective k ?_
     rw [map_mul, toComplexMatrixHom_star, h, map_one]
 
+/-! ### Probability conservation
+
+For photonics: the squared amplitudes down any column (or across any row) of
+a unitary scattering matrix sum to exactly `1`, **as computable reals** — no
+square roots needed, since probabilities are `normSq`, not `abs`.
+-/
+
+theorem sum_normSq_col_of_unitary {k : ℕ} {U : CMatrix k}
+    (hU : U ∈ Matrix.unitaryGroup (Fin k) CComplex) (j : Fin k) :
+    ∑ i, normSq (U i j) = 1 := by
+  have h : star U * U = 1 := Matrix.mem_unitaryGroup_iff'.mp hU
+  have hjj : (star U * U) j j = (1 : CMatrix k) j j := by rw [h]
+  rw [Matrix.mul_apply, Matrix.one_apply_eq] at hjj
+  have hterm : ∀ i, (star U) j i * U i j = ofReal (normSq (U i j)) := by
+    intro i
+    rw [Matrix.star_apply, star_def, mul_comm]
+    exact mul_conj (U i j)
+  rw [Finset.sum_congr rfl (fun i _ => hterm i)] at hjj
+  have := congrArg re hjj
+  simpa [re_sum] using this
+
+theorem sum_normSq_row_of_unitary {k : ℕ} {U : CMatrix k}
+    (hU : U ∈ Matrix.unitaryGroup (Fin k) CComplex) (i : Fin k) :
+    ∑ j, normSq (U i j) = 1 := by
+  have h : U * star U = 1 := Matrix.mem_unitaryGroup_iff.mp hU
+  have hii : (U * star U) i i = (1 : CMatrix k) i i := by rw [h]
+  rw [Matrix.mul_apply, Matrix.one_apply_eq] at hii
+  have hterm : ∀ j, U i j * (star U) j i = ofReal (normSq (U i j)) := by
+    intro j
+    rw [Matrix.star_apply, star_def]
+    exact mul_conj (U i j)
+  rw [Finset.sum_congr rfl (fun j _ => hterm j)] at hii
+  have := congrArg re hii
+  simpa [re_sum] using this
+
 /-! ### Sanity examples -/
 
 -- The matrix ring over `CComplex` is available by substitution.

@@ -118,6 +118,24 @@ theorem normSq_pos_of_ne_zero {z : CComplex} (hz : z ≠ 0) : 0 < normSq z := by
 theorem normSq_ne_zero_of_ne_zero {z : CComplex} (hz : z ≠ 0) : normSq z ≠ 0 :=
   ne_of_gt (normSq_pos_of_ne_zero hz)
 
+theorem normSq_nonneg (z : CComplex) : 0 ≤ normSq z :=
+  add_nonneg (mul_self_nonneg _) (mul_self_nonneg _)
+
+@[simp] theorem normSq_eq_zero {z : CComplex} : normSq z = 0 ↔ z = 0 := by
+  constructor
+  · intro h
+    by_contra hz
+    exact normSq_ne_zero_of_ne_zero hz h
+  · rintro rfl
+    exact normSq_zero
+
+/-- `toComplex` intertwines the computable `normSq` with Mathlib's. -/
+theorem toComplex_normSq (z : CComplex) :
+    Complex.normSq (toComplex z) = CReal.toReal (normSq z) := by
+  rw [show normSq z = z.re * z.re + z.im * z.im from rfl, CReal.toReal_add,
+    CReal.toReal_mul, CReal.toReal_mul]
+  simp [Complex.normSq_apply]
+
 noncomputable instance : Inv CComplex :=
   ⟨fun z => ⟨z.re * (normSq z)⁻¹, -z.im * (normSq z)⁻¹⟩⟩
 

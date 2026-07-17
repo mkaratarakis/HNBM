@@ -124,6 +124,14 @@ def exp (z : FastComplex) : FastComplex :=
   let r := FastReal.exp z.re
   ⟨r * FastReal.cos z.im, r * FastReal.sin z.im⟩
 
+/-- A pure phase `e^{iθ} = cos θ + i sin θ` (cheaper than `exp ⟨0, θ⟩`). Total. -/
+def phase (θ : FastReal) : FastComplex :=
+  ⟨FastReal.cos θ, FastReal.sin θ⟩
+
+/-- Polar constructor `r·e^{iθ}`. Total. -/
+def fromPolar (r θ : FastReal) : FastComplex :=
+  ⟨r * FastReal.cos θ, r * FastReal.sin θ⟩
+
 /-- `cos z = (exp (I*z) + exp (-I*z)) / 2`, computed componentwise. Total. -/
 def cos (z : FastComplex) : FastComplex :=
   -- cos (a + b*I) = cos a * cosh b - sin a * sinh b * I, via exp of ±b.
