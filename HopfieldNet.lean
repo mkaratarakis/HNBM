@@ -18,5 +18,17 @@ import HopfieldNet.Quiver.NeuralNetwork.Stochastic
 import HopfieldNet.Quiver.NeuralNetwork.TwoState
 import HopfieldNet.Quiver.NeuralNetwork.Zero_temp
 import HopfieldNet.Quiver.NeuralNetwork.toCanonicalEnsemble
+import HopfieldNet.CReals.API.NNtest
+import HopfieldNet.CReals.API.HNtest
+import HopfieldNet.CReals.ComputableRealsBridge
+import HopfieldNet.CReals.Computable.FastEnergy
+import HopfieldNet.CReals.Computable.FastLogistic
+import HopfieldNet.CReals.Computable.Refinement
+import HopfieldNet.CReals.Computable.Preservation
+import HopfieldNet.CReals.Computable.EnergySound
+import HopfieldNet.CReals.Computable.QuiverBridge
+import HopfieldNet.CReals.Computable.GibbsSound
+import HopfieldNet.CReals.Computable.InvSound
+import HopfieldNet.CReals.Computable.ExpSound
 import HopfieldNet.TSAux
 import HopfieldNet.aux
