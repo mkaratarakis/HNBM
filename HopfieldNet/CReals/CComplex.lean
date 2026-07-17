@@ -176,6 +176,9 @@ instance : Algebra CReal CComplex := ofRealRingHom.toAlgebra
 @[simp] theorem smul_im (x : CReal) (z : CComplex) : (x • z).im = x * z.im := by
   rw [Algebra.smul_def]; simp
 
+@[simp] theorem conj_smul (x : CReal) (z : CComplex) : conj (x • z) = x • conj z := by
+  ext <;> simp [mul_neg]
+
 /-- Conjugation as a ring homomorphism. -/
 def conjRingHom : CComplex →+* CComplex where
   toFun := conj
@@ -188,6 +191,12 @@ def conjRingHom : CComplex →+* CComplex where
   map_add' := by intros; ext <;> simp [add_comm]
 
 @[simp] theorem conj_conj (z : CComplex) : conj (conj z) = z := by
+  ext <;> simp
+
+@[simp] theorem conj_one : conj (1 : CComplex) = 1 := by
+  ext <;> simp
+
+@[simp] theorem conj_I : conj I = -I := by
   ext <;> simp
 
 /-! ### Star structure
