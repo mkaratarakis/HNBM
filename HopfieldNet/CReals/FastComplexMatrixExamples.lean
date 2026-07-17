@@ -1,43 +1,58 @@
 import HopfieldNet.CReals.FastComplexMatrix
 
-open Computable.Fast Computable.Fast.FastMatrix Computable.Fast.Photonics
+open Computable.Fast Computable.Fast.FastMatrix
 
 namespace Computable.Fast.FastComplexMatrixExamples
 set_option autoImplicit false
 /-!
-Executable smoke tests for `FastMatrix` and the photonic devices.
+Executable smoke tests for `FastMatrix`. The test matrices are standard 2×2
+unitaries (a 50:50 splitter, a phase rotation, and their composition), used
+here purely as generic exercises of `mul`, `kron`, and `unitaryUpTo`.
 -/
 
--- The beam splitter matrix itself: (1/√2)·[[1, i], [i, 1]]
-#eval IO.println (toDecimal beamSplitter 8)
+/-- Test unitary `(1/√2) · [[1, i], [i, 1]]` (irrational entries). -/
+def U : FastMatrix 2 2 :=
+  let s : FastReal := FastReal.sqrt (FastReal.ofDyadic ⟨1, -1⟩) -- 1/√2 = √(1/2)
+  ![![⟨s, 0⟩, ⟨0, s⟩],
+    ![⟨0, s⟩, ⟨s, 0⟩]]
 
--- BS · BS = [[0, i], [i, 0]]: a photon entering mode 1 exits mode 2 with phase i
-#eval IO.println (toDecimal (beamSplitter * beamSplitter) 8)
+/-- Test unitary `[[1, 0], [0, e^{iφ}]]` (transcendental entries). -/
+def P (φ : FastReal) : FastMatrix 2 2 :=
+  ![![1, 0],
+    ![0, FastComplex.phase φ]]
 
--- Rigorous unitarity certificates: every entry of U·Uᴴ - 1 certified < 2⁻²⁰
-#eval unitaryUpTo beamSplitter 20
-#eval unitaryUpTo (phaseShifter FastReal.pi) 20
-#eval unitaryUpTo (mzi (FastReal.mul FastReal.pi (FastReal.ofDyadic ⟨1, -1⟩))) 20
+/-- A composed product of the two. -/
+def UPU (φ : FastReal) : FastMatrix 2 2 := U * P φ * U
 
--- 4-mode circuit (BS ⊗ BS) stays unitary
-#eval unitaryUpTo twoBeamSplitters 20
+def piHalf : FastReal := FastReal.mul FastReal.pi (FastReal.ofDyadic ⟨1, -1⟩)
 
--- Balanced MZI at φ = π/2: |t₀₀|² = |t₀₁|² = 1/2 (50:50 output)
-def mziHalfPi : FastMatrix 2 2 := mzi (FastReal.mul FastReal.pi (FastReal.ofDyadic ⟨1, -1⟩))
-#eval FastReal.toDecimal (FastComplex.abs (mziHalfPi 0 0)) 8   -- ≈ 1/√2
-#eval FastReal.toDecimal (FastComplex.abs (mziHalfPi 0 1)) 8   -- ≈ 1/√2
+-- The test matrix itself: (1/√2)·[[1, i], [i, 1]]
+#eval IO.println (toDecimal U 8)
 
--- MZI at φ = 0: BS·BS, photon swaps modes deterministically
-def mziZero : FastMatrix 2 2 := mzi 0
-#eval FastReal.toDecimal (FastComplex.abs (mziZero 0 0)) 8     -- ≈ 0
-#eval FastReal.toDecimal (FastComplex.abs (mziZero 0 1)) 8     -- ≈ 1
+-- U · U = [[0, i], [i, 0]] (a swap with phase i)
+#eval IO.println (toDecimal (U * U) 8)
 
--- Single photon in mode 1 through a beam splitter: amplitudes (1/√2, i/√2),
--- probabilities sum to 1
-def out : Fin 2 → FastComplex := mulVec beamSplitter ![1, 0]
+-- Rigorous unitarity certificates: every entry of A·Aᴴ - 1 certified < 2⁻²⁰
+#eval unitaryUpTo U 20
+#eval unitaryUpTo (P FastReal.pi) 20
+#eval unitaryUpTo (UPU piHalf) 20
+
+-- Kronecker product of unitaries stays unitary (4×4)
+#eval unitaryUpTo (kron U U) 20
+
+-- Entry magnitudes of the composition at φ = π/2: both ≈ 1/√2
+#eval FastReal.toDecimal (FastComplex.abs (UPU piHalf 0 0)) 8
+#eval FastReal.toDecimal (FastComplex.abs (UPU piHalf 0 1)) 8
+
+-- At φ = 0 the composition is a deterministic swap: |(0,0)| ≈ 0, |(0,1)| ≈ 1
+#eval FastReal.toDecimal (FastComplex.abs (UPU 0 0 0)) 8
+#eval FastReal.toDecimal (FastComplex.abs (UPU 0 0 1)) 8
+
+-- mulVec preserves the norm: ‖U·e₁‖² = 1
+def out : Fin 2 → FastComplex := mulVec U ![1, 0]
 #eval FastReal.toDecimal (FastComplex.normSq (out 0) + FastComplex.normSq (out 1)) 10
 
--- Certified failure of a NON-unitary matrix: 2·BS is not unitary
-#eval unitaryUpTo (FastComplex.ofDyadic ⟨2, 0⟩ • beamSplitter) 20  -- false (not certified)
+-- Certified failure: 2·U is not unitary
+#eval unitaryUpTo (FastComplex.ofDyadic ⟨2, 0⟩ • U) 20  -- false (not certified)
 
 end Computable.Fast.FastComplexMatrixExamples

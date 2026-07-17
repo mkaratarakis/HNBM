@@ -5,19 +5,18 @@ import Mathlib.Data.Fin.VecNotation
 # FastMatrix: executable complex matrix arithmetic
 
 Matrices of computable complex numbers (`FastComplex`), purely executable
-(`#eval`-friendly), aimed at linear-optical / photonic circuits:
+(`#eval`-friendly):
 
 - ring-style operations: `add`, `sub`, `smul`, `mul` (matrix product),
-  `mulVec` (state evolution), `trace`;
-- `conjTranspose` (`Aᴴ`), the operation defining unitarity;
-- `kron`, the Kronecker/tensor product, for composing optical modes;
+  `mulVec`, `trace`;
+- `conjTranspose` (`Aᴴ`) and `transpose`;
+- `kron`, the Kronecker/tensor product;
 - `unitaryUpTo`, a **rigorous numerical certificate** of unitarity: interval
   arithmetic certifies every entry of `U * Uᴴ - 1` has absolute value below
   `2^{-tol}`. `true` is a sound bound; `false` only means "not certified at
   this precision".
 
-Concrete photonic devices (`beamSplitter`, `phaseShifter`, `mzi`) are at the
-bottom. See `FastComplexMatrixExamples.lean` for `#eval` smoke tests.
+See `FastComplexMatrixExamples.lean` for `#eval` smoke tests.
 -/
 
 namespace Computable.Fast
@@ -108,36 +107,5 @@ def toDecimal (A : FastMatrix m n) (digits : Nat := 6) : String :=
       (A i j).toDecimal digits
 
 end FastMatrix
-
-/-!
-### Photonic devices
-
-The standard 2-mode building blocks of linear optics.
--/
-
-namespace Photonics
-
-open FastMatrix
-
-/-- Symmetric 50:50 beam splitter `(1/√2) · [[1, i], [i, 1]]`. -/
-def beamSplitter : FastMatrix 2 2 :=
-  let s : FastReal := FastReal.sqrt (FastReal.ofDyadic ⟨1, -1⟩) -- 1/√2 = √(1/2)
-  ![![⟨s, 0⟩, ⟨0, s⟩],
-    ![⟨0, s⟩, ⟨s, 0⟩]]
-
-/-- Phase shifter by `φ` on the second mode: `[[1, 0], [0, e^{iφ}]]`. -/
-def phaseShifter (φ : FastReal) : FastMatrix 2 2 :=
-  ![![1, 0],
-    ![0, FastComplex.phase φ]]
-
-/-- Mach–Zehnder interferometer: beam splitter, phase `φ`, beam splitter. -/
-def mzi (φ : FastReal) : FastMatrix 2 2 :=
-  beamSplitter * phaseShifter φ * beamSplitter
-
-/-- Two beam splitters acting on modes (1,2) and (3,4) of a 4-mode circuit. -/
-def twoBeamSplitters : FastMatrix 4 4 :=
-  kron beamSplitter beamSplitter
-
-end Photonics
 
 end Computable.Fast

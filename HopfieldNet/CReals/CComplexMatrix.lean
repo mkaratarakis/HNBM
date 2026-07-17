@@ -9,17 +9,16 @@ Because `CommRing CComplex` and `StarRing CComplex` are **computable**
 instances, all of the following come from Mathlib for free and remain
 computable in principle: matrix `+`, `*` (via `Finset.sum`), `1`,
 `conjTranspose` (`Aᴴ` = `star`), and the predicate
-`Matrix.unitaryGroup (Fin k) CComplex` — the mathematical home of photonic
-scattering matrices.
+`Matrix.unitaryGroup (Fin k) CComplex`.
 
 This file adds the theorem-transfer layer: entrywise `toComplex` is an
 injective ring hom into `Matrix (Fin k) (Fin k) ℂ` that intertwines `star`,
 so **a computable matrix is unitary iff its Mathlib-`ℂ` image is unitary**
-(`mem_unitaryGroup_iff_map`). Photonics facts proved over `ℂ` with Mathlib's
-analysis pull back to `CMatrix`, and vice versa.
+(`mem_unitaryGroup_iff_map`). Facts proved over `ℂ` with Mathlib's analysis
+pull back to `CMatrix`, and vice versa.
 
-Executable numerics (beam splitters, MZIs, certified unitarity bounds) live
-in `FastComplexMatrix.lean`.
+Executable numerics (certified unitarity bounds) live in
+`FastComplexMatrix.lean`.
 -/
 
 namespace Computable
@@ -78,11 +77,11 @@ theorem mem_unitaryGroup_iff_map {k : ℕ} (A : CMatrix k) :
     refine toComplexMatrixHom_injective k ?_
     rw [map_mul, toComplexMatrixHom_star, h, map_one]
 
-/-! ### Probability conservation
+/-! ### Column and row norms of unitaries
 
-For photonics: the squared amplitudes down any column (or across any row) of
-a unitary scattering matrix sum to exactly `1`, **as computable reals** — no
-square roots needed, since probabilities are `normSq`, not `abs`.
+The `normSq`s down any column (or across any row) of a unitary matrix sum to
+exactly `1`, **as computable reals** — a polynomial statement, no square
+roots involved.
 -/
 
 theorem sum_normSq_col_of_unitary {k : ℕ} {U : CMatrix k}

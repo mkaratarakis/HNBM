@@ -1,4 +1,4 @@
-import HopfieldNet.CReals.CRealCCLOF
+import HopfieldNet.CReals.CRealCast
 import Mathlib.Data.Real.Sqrt
 
 /-!
@@ -13,8 +13,9 @@ Main results:
 * `CReal.toReal_sqrtQ : toReal (sqrtQ q) = Real.sqrt q` (for `0 ≤ q`);
 * `CReal.sqrtQ_mul_self : sqrtQ q * sqrtQ q = (q : CReal)` (for `0 ≤ q`).
 
-This is the amplitude-level primitive photonics needs: e.g. `sqrtQ (1/2)` is
-a verified `1/√2`, the beam-splitter amplitude (see `CPhotonics.lean`).
+The general `CReal.sqrt : CReal → CReal` (arbitrary computable-real input)
+lives in `CRealSqrt.lean`; this file is the rational special case with a
+direct, fast representative.
 -/
 
 namespace Computable
@@ -116,8 +117,6 @@ def Pre.sqrtQ (q : ℚ) : CReal.Pre where
 
 /-- `√q` as a computable real (`0` for `q < 0`). -/
 def sqrtQ (q : ℚ) : CReal := ⟦Pre.sqrtQ q⟧
-
-@[simp] theorem toReal_ratCast (q : ℚ) : toReal ((q : ℚ) : CReal) = (q : ℝ) := rfl
 
 theorem toReal_sqrtQ {q : ℚ} (hq : 0 ≤ q) : toReal (sqrtQ q) = Real.sqrt q := by
   show Real.mk (Pre.toCauSeq (Pre.sqrtQ q)) = Real.sqrt q
