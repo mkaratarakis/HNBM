@@ -52,6 +52,17 @@ attribute [simp] toReal_add toReal_mul toReal_neg
 @[simp] theorem toReal_pow (x : CReal) (n : ℕ) : toReal (x ^ n) = toReal x ^ n :=
   map_pow toRealRingHom x n
 
+attribute [simp] toReal_inv
+
+@[simp] theorem toReal_div (x y : CReal) : toReal (x / y) = toReal x / toReal y := by
+  rw [div_eq_mul_inv, toReal_mul, toReal_inv, div_eq_mul_inv]
+
+@[simp] theorem toReal_zpow (x : CReal) (n : ℤ) : toReal (x ^ n) = toReal x ^ n := by
+  cases n with
+  | ofNat m => simp [toReal_pow x m]
+  | negSucc m =>
+    rw [zpow_negSucc, zpow_negSucc, toReal_inv, toReal_pow]
+
 /-! ### The rational embedding as a ring hom -/
 
 @[simp] theorem ratCast_zero : ((0 : ℚ) : CReal) = 0 := by

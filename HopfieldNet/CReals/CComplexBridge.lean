@@ -161,6 +161,22 @@ noncomputable instance : Field CComplex where
   inv_zero := by
     ext <;> simp
 
+/-! ### `toComplex` preserves inversion and division
+
+`toComplex` is a ring hom between fields, hence preserves `⁻¹` and `/`. This
+completes the transfer picture: the full field structure moves across. -/
+
+@[simp] theorem toComplex_inv (z : CComplex) : toComplex z⁻¹ = (toComplex z)⁻¹ :=
+  map_inv₀ toComplexRingHom z
+
+@[simp] theorem toComplex_div (z w : CComplex) :
+    toComplex (z / w) = toComplex z / toComplex w :=
+  map_div₀ toComplexRingHom z w
+
+@[simp] theorem toComplex_zpow (z : CComplex) (n : ℤ) :
+    toComplex (z ^ n) = toComplex z ^ n :=
+  map_zpow₀ toComplexRingHom z n
+
 /-! ### Theorem transfer examples
 
 Generic field theorems instantiate at `CComplex` by substitution, and

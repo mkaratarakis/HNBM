@@ -102,6 +102,56 @@ theorem abs_ofReal {x : CReal} (hx : 0 ≤ x) : abs (ofReal x) = x := by
     rw [← CReal.toReal_zero]; exact CReal.toReal_mono hx
   simp [Complex.norm_real, abs_of_nonneg h]
 
+theorem abs_pow (z : CComplex) (n : ℕ) : abs (z ^ n) = abs z ^ n := by
+  apply CReal.toReal_injective
+  simp [norm_pow]
+
+theorem abs_inv (z : CComplex) : abs z⁻¹ = (abs z)⁻¹ := by
+  apply CReal.toReal_injective
+  rw [toReal_abs, CReal.toReal_inv, toReal_abs, toComplex_inv, norm_inv]
+
+theorem abs_div (z w : CComplex) : abs (z / w) = abs z / abs w := by
+  apply CReal.toReal_injective
+  rw [toReal_abs, CReal.toReal_div, toReal_abs, toReal_abs, toComplex_div,
+    Complex.norm_div]
+
+/-- `sq`-form of `sq_abs`, matching `Complex.sq_norm`. -/
+theorem sq_abs' (z : CComplex) : abs z ^ 2 = normSq z := by
+  rw [sq]; exact sq_abs z
+
+/-! ### Geometry: components bounded by the modulus
+
+Each of these routes through the analogous fact on `ℂ` via `toReal_le_iff`. -/
+
+theorem re_le_abs (z : CComplex) : z.re ≤ abs z := by
+  rw [← CReal.toReal_le_iff, toReal_abs]
+  simpa using Complex.re_le_norm (toComplex z)
+
+theorem im_le_abs (z : CComplex) : z.im ≤ abs z := by
+  rw [← CReal.toReal_le_iff, toReal_abs]
+  simpa using Complex.im_le_norm (toComplex z)
+
+theorem neg_abs_le_re (z : CComplex) : -abs z ≤ z.re := by
+  rw [← CReal.toReal_le_iff, CReal.toReal_neg, toReal_abs]
+  have h := Complex.abs_re_le_norm (toComplex z)
+  simp only [toComplex_re] at *
+  linarith [(abs_le.1 h).1]
+
+theorem neg_abs_le_im (z : CComplex) : -abs z ≤ z.im := by
+  rw [← CReal.toReal_le_iff, CReal.toReal_neg, toReal_abs]
+  have h := Complex.abs_im_le_norm (toComplex z)
+  simp only [toComplex_im] at *
+  linarith [(abs_le.1 h).1]
+
+/-- The modulus is dominated by the sum of the component magnitudes' bounds. -/
+theorem abs_le_re_add_im_abs (z : CComplex) :
+    abs z ≤ CReal.sqrt (z.re * z.re) + CReal.sqrt (z.im * z.im) := by
+  rw [← CReal.toReal_le_iff, toReal_abs]
+  simp only [CReal.toReal_add, CReal.toReal_sqrt, CReal.toReal_mul]
+  have h := Complex.norm_le_abs_re_add_abs_im (toComplex z)
+  rw [Real.sqrt_mul_self_eq_abs, Real.sqrt_mul_self_eq_abs]
+  simpa using h
+
 /-- `abs`, bundled as an `AbsoluteValue`. -/
 def absv : AbsoluteValue CComplex CReal where
   toFun := abs
