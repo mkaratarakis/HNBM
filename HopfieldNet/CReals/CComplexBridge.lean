@@ -69,6 +69,42 @@ theorem toComplex_ofReal (x : CReal) :
     toComplex (ofReal x) = (CReal.toReal x : ℂ) := by
   apply Complex.ext <;> simp
 
+/-! ### Ring equivalence with Mathlib's `ℂ` -/
+
+/-- The (noncomputable) inverse: pull a Mathlib complex number back to `CComplex`
+componentwise via `CReal.FromReal.ofReal`. -/
+noncomputable def ofComplex (w : ℂ) : CComplex :=
+  ⟨CReal.FromReal.ofReal w.re, CReal.FromReal.ofReal w.im⟩
+
+@[simp] theorem toComplex_ofComplex (w : ℂ) : toComplex (ofComplex w) = w := by
+  apply Complex.ext <;> simp [ofComplex, CReal.toReal_ofReal]
+
+@[simp] theorem ofComplex_toComplex (z : CComplex) : ofComplex (toComplex z) = z := by
+  ext <;> simp [ofComplex, CReal.ofReal_toReal]
+
+theorem toComplex_surjective : Function.Surjective toComplex :=
+  fun w => ⟨ofComplex w, toComplex_ofComplex w⟩
+
+theorem toComplex_bijective : Function.Bijective toComplex :=
+  ⟨toComplex_injective, toComplex_surjective⟩
+
+/-- The computable complex numbers are ring-equivalent to Mathlib's `ℂ`
+(noncomputably: the inverse direction goes through `FromReal.ofReal`, which
+cannot be computable since Mathlib's `ℝ` erases moduli of convergence). -/
+noncomputable def complexRingEquiv : CComplex ≃+* ℂ where
+  toFun := toComplex
+  invFun := ofComplex
+  left_inv := ofComplex_toComplex
+  right_inv := toComplex_ofComplex
+  map_mul' := map_mul toComplexRingHom
+  map_add' := map_add toComplexRingHom
+
+@[simp] theorem complexRingEquiv_apply (z : CComplex) :
+    complexRingEquiv z = toComplex z := rfl
+
+@[simp] theorem complexRingEquiv_symm_apply (w : ℂ) :
+    complexRingEquiv.symm w = ofComplex w := rfl
+
 /-! ### Classical field structure -/
 
 theorem normSq_pos_of_ne_zero {z : CComplex} (hz : z ≠ 0) : 0 < normSq z := by
