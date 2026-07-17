@@ -170,6 +170,30 @@ instance : Algebra CReal CComplex := ofRealRingHom.toAlgebra
 @[simp] theorem algebraMap_eq (x : CReal) :
     algebraMap CReal CComplex x = ofReal x := rfl
 
+/-! ### `re`/`im` of ring casts
+
+`CComplex` inherits `NatCast`/`IntCast` from its `CommRing`; both factor
+through `ofReal`, so their real/imaginary parts are the corresponding `CReal`
+cast and `0`. (This relies on `CReal` having a single, canonical `NatCast`.) -/
+
+@[simp] theorem ofReal_natCast (n : ℕ) : ofReal (n : CReal) = (n : CComplex) := by
+  rw [← ofRealRingHom_apply]; exact map_natCast ofRealRingHom n
+
+@[simp] theorem ofReal_intCast (k : ℤ) : ofReal (k : CReal) = (k : CComplex) := by
+  rw [← ofRealRingHom_apply]; exact map_intCast ofRealRingHom k
+
+@[simp] theorem natCast_re (n : ℕ) : (n : CComplex).re = (n : CReal) := by
+  rw [← ofReal_natCast]; rfl
+
+@[simp] theorem natCast_im (n : ℕ) : (n : CComplex).im = 0 := by
+  rw [← ofReal_natCast]; rfl
+
+@[simp] theorem intCast_re (k : ℤ) : (k : CComplex).re = (k : CReal) := by
+  rw [← ofReal_intCast]; rfl
+
+@[simp] theorem intCast_im (k : ℤ) : (k : CComplex).im = 0 := by
+  rw [← ofReal_intCast]; rfl
+
 @[simp] theorem smul_re (x : CReal) (z : CComplex) : (x • z).re = x * z.re := by
   rw [Algebra.smul_def]; simp
 

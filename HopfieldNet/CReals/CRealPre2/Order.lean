@@ -992,13 +992,10 @@ instance : IsOrderedRing CReal where
 
 /-! ### Archimedean Property -/
 
-/-- Embedding of natural numbers into CReal.Pre. -/
-def Pre.ofNat (n : ℕ) : CReal.Pre where
-  approx := fun _ => (n : ℚ)
-  is_regular := by intro k m _; simp
-
-instance : NatCast CReal where
-  natCast n := ⟦Pre.ofNat n⟧
+-- Note: `CReal` gets its `NatCast` from the `CommRing` structure (in
+-- `Algebra.lean`). We deliberately do NOT add a second, standalone
+-- `NatCast CReal` here: two `NatCast` instances that are not defeq form a
+-- diamond that breaks `map_natCast`-style rewriting downstream.
 
 /-- Pre-level n-fold addition of a pre-real (compatible with `CReal`'s `nsmul`). -/
 def Pre.nsmul (n : ℕ) (y : CReal.Pre) : CReal.Pre :=

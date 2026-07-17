@@ -27,17 +27,15 @@ attribute [simp] toReal_add toReal_mul toReal_neg
 
 @[simp] theorem toReal_ratCast (q : ℚ) : toReal ((q : ℚ) : CReal) = (q : ℝ) := rfl
 
-@[simp] theorem toReal_natCast (n : ℕ) : toReal ((n : ℕ) : CReal) = (n : ℝ) := by
-  have h : toReal ((n : ℕ) : CReal) = ((n : ℚ) : ℝ) := rfl
-  rw [h]; norm_cast
+@[simp] theorem toReal_natCast (n : ℕ) : toReal ((n : ℕ) : CReal) = (n : ℝ) :=
+  map_natCast toRealRingHom n
 
 @[simp] theorem toReal_intCast (k : ℤ) : toReal ((k : ℤ) : CReal) = (k : ℝ) :=
   map_intCast toRealRingHom k
 
 @[simp] theorem toReal_ofNat (n : ℕ) [n.AtLeastTwo] :
-    toReal (OfNat.ofNat n : CReal) = OfNat.ofNat n := by
-  have h : toReal (OfNat.ofNat n : CReal) = ((n : ℚ) : ℝ) := rfl
-  rw [h]; norm_cast
+    toReal (OfNat.ofNat n : CReal) = OfNat.ofNat n :=
+  map_ofNat toRealRingHom n
 
 /-! ### `toReal` and the remaining ring operations
 
