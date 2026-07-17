@@ -122,6 +122,21 @@ def conjRingHom : CComplex →+* CComplex where
 @[simp] theorem conj_conj (z : CComplex) : conj (conj z) = z := by
   ext <;> simp
 
+/-! ### Star structure
+
+Conjugation as a (computable) `StarRing` structure. This is what makes
+Mathlib's `Matrix.conjTranspose` (`Aᴴ`) and `Matrix.unitaryGroup` available
+over `CComplex`.
+-/
+
+instance : StarRing CComplex where
+  star := conj
+  star_involutive := conj_conj
+  star_mul := by intro z w; ext <;> simp [mul_comm, add_comm]
+  star_add := by intro z w; ext <;> simp [add_comm]
+
+@[simp] theorem star_def (z : CComplex) : star z = conj z := rfl
+
 end CComplex
 
 end Computable
