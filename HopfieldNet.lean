@@ -32,5 +32,6 @@ import HopfieldNet.CReals.Computable.InvSound
 import HopfieldNet.CReals.Computable.ExpSound
 import HopfieldNet.CReals.Computable.SqrtSound
 import HopfieldNet.CReals.Computable.FastComplexSound
+import HopfieldNet.CReals.Computable.FastMatrixSound
 import HopfieldNet.TSAux
 import HopfieldNet.aux
