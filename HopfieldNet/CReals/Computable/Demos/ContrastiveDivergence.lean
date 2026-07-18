@@ -82,9 +82,6 @@ def stored : Fin 4 → FastReal := ![-1, 1, -1, 1]
 /-- A pattern the net does *not* store. -/
 def novel : Fin 4 → FastReal := ![1, 1, 1, 1]
 
-/-- The zero weight matrix (untrained). -/
-def zeroW : Matrix (Fin 4) (Fin 4) FastReal := fun _ _ => 0
-
 -- 1. CD on a STORED pattern with the trained weights: reconstruction = data,
 --    so Δw is the all-zero matrix — nothing left to learn.
 #eval (cdDelta? (hebbW ps) (fun _ => 0) 2 4 stored).map showMat
