@@ -193,11 +193,34 @@ theorem le_total (x y : CReal) : x ≤ y ∨ y ≤ x := by
   have h := _root_.le_total (toReal x) (toReal y)
   exact h.imp (fun hxy => (toReal_le_iff).1 hxy) (fun hyx => (toReal_le_iff).1 hyx)
 
-noncomputable instance : Min CReal := ⟨fun a b => if a ≤ b then a else b⟩
-noncomputable instance : Max CReal := ⟨fun a b => if a ≤ b then b else a⟩
+/-! ### Binary `min`/`max` = the (computable) lattice `⊓`/`⊔`
+
+The `Min`/`Max` on `CReal` are the **lattice operations** from
+`CRealPre2.Order` (built from `Pre.min`/`Pre.max`), so `min = ⊓` and
+`max = ⊔` hold *definitionally*. This is what keeps the classical
+`LinearOrder` below diamond-free with the computable `Lattice`: without it,
+the `LinearOrder`-derived `Max` and `SemilatticeSup.toMax` are distinct
+non-defeq instances. `sup_eq_ite`/`inf_eq_ite` discharge the `max_def`/
+`min_def` obligations that this identification incurs. -/
+
+/-- The lattice `⊔` matches the linear-order conditional form. -/
+theorem sup_eq_ite (a b : CReal) : a ⊔ b = if a ≤ b then b else a := by
+  by_cases h : a ≤ b
+  · rw [if_pos h]; exact sup_eq_right.mpr h
+  · rw [if_neg h]; exact sup_eq_left.mpr ((le_total a b).resolve_left h)
+
+/-- The lattice `⊓` matches the linear-order conditional form. -/
+theorem inf_eq_ite (a b : CReal) : a ⊓ b = if a ≤ b then a else b := by
+  by_cases h : a ≤ b
+  · rw [if_pos h]; exact inf_eq_left.mpr h
+  · rw [if_neg h]; exact inf_eq_right.mpr ((le_total a b).resolve_left h)
+
+instance : Min CReal := ⟨(· ⊓ ·)⟩
+instance : Max CReal := ⟨(· ⊔ ·)⟩
 noncomputable instance : Ord CReal := ⟨fun a b => compareOfLessAndEq a b⟩
 
-/-- Classical linear order on `CReal` (extending the existing `≤`). -/
+/-- Classical linear order on `CReal` (extending the existing `≤`), with
+`min`/`max` identified with the computable lattice `⊓`/`⊔`. -/
 noncomputable instance : LinearOrder CReal := by
   classical
   -- Use the existing `PartialOrder` and our `le_total`.
@@ -206,8 +229,8 @@ noncomputable instance : LinearOrder CReal := by
     (toDecidableLE := fun a b => Classical.decRel (fun x y : CReal => x ≤ y) a b)
     (toDecidableEq := Classical.decEq CReal)
     (toDecidableLT := fun a b => Classical.decRel (fun x y : CReal => x < y) a b)
-    (min_def := by intro a b; rfl)
-    (max_def := by intro a b; rfl)
+    (min_def := inf_eq_ite)
+    (max_def := sup_eq_ite)
 
 /-! ### `toReal` is an order embedding -/
 
@@ -417,10 +440,8 @@ noncomputable instance : ConditionallyCompleteLattice CReal := by
 noncomputable instance : ConditionallyCompleteLinearOrder CReal := by
   classical
   exact
-    { le_total := le_total
-      toDecidableLE := fun a b => Classical.decRel (fun x y : CReal => x ≤ y) a b
-      toDecidableEq := Classical.decEq CReal
-      toDecidableLT := fun a b => Classical.decRel (fun x y : CReal => x < y) a b
+    { (inferInstance : LinearOrder CReal),
+      (inferInstance : ConditionallyCompleteLattice CReal) with
       csSup_of_not_bddAbove := by
         intro s hs
         apply toReal_injective
