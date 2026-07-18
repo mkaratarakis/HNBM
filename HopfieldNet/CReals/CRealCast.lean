@@ -120,7 +120,8 @@ Any equation between `CReal` expressions built from casts and ring
 operations reduces to an `ℝ` (hence effectively `ℚ`) statement. Examples: -/
 
 example : ((1 / 2 : ℚ) : CReal) + ((1 / 2 : ℚ) : CReal) = 1 := by
-  apply toReal_injective; simp [toReal_inv]; norm_num
+  apply toReal_injective
+  simp only [toReal_add, toReal_ratCast, toReal_one]; norm_num
 
 example (x y : CReal) : (x + y) * (x - y) = x * x - y * y := by
   apply toReal_injective; simp; ring

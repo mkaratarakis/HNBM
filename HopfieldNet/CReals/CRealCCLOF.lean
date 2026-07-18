@@ -313,41 +313,44 @@ noncomputable instance : Inv CReal := ⟨fun x => FromReal.ofReal ((toReal x)⁻
 theorem toReal_inv (x : CReal) : toReal x⁻¹ = (toReal x)⁻¹ := by
   simp [Inv.inv, toReal_ofReal]
 
-noncomputable instance : Field CReal := by
-  classical
-  -- Build a `Field` structure using Mathlib's minimal-axioms constructor, keeping the existing
-  -- ring operations and supplying the inverse axioms via `toReal`.
-  refine
-    Field.ofMinimalAxioms CReal
-      (add_assoc := by intro a b c; exact _root_.add_assoc a b c)
-      (zero_add := by intro a; exact _root_.zero_add a)
-      (neg_add_cancel := by intro a; exact _root_.neg_add_cancel a)
-      (mul_assoc := by intro a b c; exact _root_.mul_assoc a b c)
-      (mul_comm := by intro a b; exact _root_.mul_comm a b)
-      (one_mul := by intro a; exact _root_.one_mul a)
-      (mul_inv_cancel := ?_)
-      (inv_zero := ?_)
-      (left_distrib := by intro a b c; exact _root_.mul_add a b c)
-      (exists_pair_ne := ⟨0, 1, zero_ne_one⟩)
-  · intro a ha
+/-! The classical `Field` **extends the existing `CommRing`** (`__ := …`) and
+reuses the existing, *computable* `RatCast CReal` (`⟦Pre.ofRat ·⟧`), rather than
+letting `Field.ofMinimalAxioms` synthesise fresh ring/cast operations. This keeps
+`Field.toCommRing`, `Field.toNatCast`/`toIntCast`, and crucially
+`Field.toRatCast` **definitionally equal** to the standalone instances — closing
+the `RatCast` diamond that a from-scratch `Field` would otherwise open. -/
+
+-- Local `toReal`–cast compatibilities (the `toReal` ring hom commutes with casts).
+private theorem toReal_natCast_loc (n : ℕ) : toReal (n : CReal) = (n : ℝ) :=
+  map_natCast toRealRingHom n
+private theorem toReal_intCast_loc (k : ℤ) : toReal (k : CReal) = (k : ℝ) :=
+  map_intCast toRealRingHom k
+private theorem toReal_ratCast_loc (q : ℚ) : toReal ((q : ℚ) : CReal) = (q : ℝ) := rfl
+
+private theorem mul_inv_cancel_loc (a : CReal) (ha : a ≠ 0) : a * a⁻¹ = 1 := by
+  apply toReal_injective
+  have ha' : toReal a ≠ (0 : ℝ) := fun h0 => ha (toReal_injective (by simpa using h0))
+  calc
+    toReal (a * a⁻¹) = toReal a * (toReal a)⁻¹ := by rw [toReal_mul, toReal_inv]
+    _ = (1 : ℝ) := mul_inv_cancel₀ ha'
+    _ = toReal (1 : CReal) := by simp
+
+noncomputable instance : Field CReal where
+  __ := (inferInstance : CommRing CReal)
+  inv := Inv.inv
+  ratCast q := (q : CReal)
+  qsmul := _
+  nnqsmul := _
+  mul_inv_cancel := mul_inv_cancel_loc
+  inv_zero := by
     apply toReal_injective
-    have ha' : toReal a ≠ (0 : ℝ) := by
-      intro h0
-      have : a = 0 := by
-        apply toReal_injective
-        -- goal is `toReal a = toReal 0`, which is `toReal a = 0`
-        simpa using h0
-      exact ha this
-    calc
-      toReal (a * a⁻¹) = toReal a * toReal a⁻¹ := by
-        simpa using (toReal_mul a a⁻¹)
-      _ = toReal a * (toReal a)⁻¹ := by simp [toReal_inv]
-      _ = (1 : ℝ) := by simpa using mul_inv_cancel₀ ha'
-      _ = toReal (1 : CReal) := by simp
-  · apply toReal_injective
-    calc
-      toReal ((0 : CReal)⁻¹) = (toReal (0 : CReal))⁻¹ := by simp [toReal_inv]
-      _ = toReal (0 : CReal) := by simp
+    rw [toReal_inv]; simp
+  ratCast_def q := by
+    apply toReal_injective
+    rw [toReal_ratCast_loc]
+    show (q : ℝ) = toReal ((q.num : CReal) * (q.den : CReal)⁻¹)
+    rw [toReal_mul, toReal_inv, toReal_intCast_loc, toReal_natCast_loc, Rat.cast_def,
+      div_eq_mul_inv]
 
 /-! ### Conditional completeness (transported from `ℝ`) -/
 
