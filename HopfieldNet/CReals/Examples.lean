@@ -1,6 +1,7 @@
 import HopfieldNet.CReals.CRealLog
 import HopfieldNet.CReals.CRealSigmoid
 import HopfieldNet.CReals.CRealPre2.InvTranscendental
+import HopfieldNet.CReals.CRealCCLOF
 
 open Computable CReal
 
@@ -52,17 +53,24 @@ noncomputable def CReal.toString (x : CReal) (prec : ℕ) : String :=
 
 /-! ## Basic Arithmetic -/
 
-def one : CReal := 1
-def two : CReal := 2
-def three : CReal := 3
-def half : CReal := (1 : CReal) * CReal.Pre.inv 2 (by norm_num) -- Using inv directly
+-- These live in the (noncomputable) quotient `CReal`; we only `#check` /
+-- prove with them below. Executable numerics belong to `Computable.Fast`.
+noncomputable def one : CReal := 1
+noncomputable def two : CReal := 2
+noncomputable def three : CReal := 3
+noncomputable def half : CReal := ((1 / 2 : ℚ) : CReal)
 
--- Note: `#eval` on `CReal` will not work directly. We use `toString`.
--- These are marked noncomputable, so we use #check instead to verify they typecheck.
+/-
+Note: `CReal` is a *quotient*, and displaying a value requires extracting a
+representative via `Quotient.out`, which is noncomputable. So `CReal.toString`
+is noncomputable and these display lines use `#check` (they confirm the
+expressions typecheck, not that they run). For actual `#eval` numerics use the
+executable `Computable.Fast` layer (`FastReal`), which is designed for it.
+-/
 #check CReal.toString (one + two) 10 -- Expected: 3.0000000000
 #check CReal.toString three 10
-
-#eval CReal.toString (two * three) 10 -- Expected: 6.0000000000
+#check CReal.toString (two * three) 10 -- Expected: 6.0000000000
+#check CReal.toString half 10 -- Expected: 0.5000000000
 
 /-! ## Transcendental Functions -/
 
@@ -70,31 +78,30 @@ def half : CReal := (1 : CReal) * CReal.Pre.inv 2 (by norm_num) -- Using inv dir
 def log_one_and_a_half : CReal := log1pRatSmall (1/2) (by norm_num)
 
 -- log(1.5) ≈ 0.405465
-#eval CReal.toString log_one_and_a_half 5 -- Expected: 0.40546
+#check CReal.toString log_one_and_a_half 5 -- Expected: 0.40546
 
 -- `sigmoid(x)` is defined for `|x| ≤ 1/2`
 -- sigmoid(0) = 1 / (1 + exp(0)) = 1/2
 def sigmoid_zero : CReal := sigmoidRatSmall 0 (by norm_num)
-#eval CReal.toString sigmoid_zero 10 -- Expected: 0.5000000000
+#check CReal.toString sigmoid_zero 10 -- Expected: 0.5000000000
 
 -- sigmoid(0.5) = 1 / (1 + exp(-0.5)) ≈ 1 / (1 + 0.6065) ≈ 0.62245
 def sigmoid_half : CReal := sigmoidRatSmall (1/2) (by norm_num)
-#eval CReal.toString sigmoid_half 5 -- Expected: 0.62245
+#check CReal.toString sigmoid_half 5 -- Expected: 0.62245
 
-/-! ## Sanity checks for the small-exp pre-real on rationals -/
+/-! ## Sanity checks for the small-exp pre-real on rationals
+
+These operate on the *pre-quotient* `CReal.Pre` directly, where `.approx n`
+is an honest rational — so unlike the quotient-level display above, these
+`#eval` and run. -/
 
 #eval (CReal.Pre.small_exp (1/4 : ℚ) (by norm_num)).approx 5
 #eval (CReal.Pre.small_exp (-1/3 : ℚ) (by norm_num)).approx 5
 
 /-! ## Comparisons -/
 
--- We can't `#eval` a `Prop`, but we can prove it.
-theorem one_lt_two' : (1 : CReal) < 2 := by
-  have : (0 : CReal) < 1 := _root_.zero_lt_one
-  have : (1 : CReal) < 1 + 1 := by
-    rw [← add_lt_add_iff_left (1 : CReal)]
-    simp [this]
-  convert this
+-- We can't `#eval` the order (it isn't decidable-by-evaluation on the
+-- quotient), but we can prove order facts. This transfers to `ℝ`.
+theorem one_lt_two' : (1 : CReal) < 2 := by norm_num
 
--- This is a sanity check that the order is working as expected.
-#guard one_lt_two
+#check one_lt_two'
