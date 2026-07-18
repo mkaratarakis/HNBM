@@ -1,10 +1,11 @@
 # `CReals/Computable` — the refinement tower
 
 A complete, `sorry`-free bridge from the repository's **executable** ball
-arithmetic (`Computable.Fast.FastReal`, `ℕ → Ball` over dyadics) to the
-**classical** real-number theory it refines. Every runtime certificate the
+arithmetic (`Computable.Fast.FastReal`, `ℕ → Ball` over dyadics — and its
+complex extension `FastComplex`/`FastMatrix`) to the **classical**
+real- and complex-number theory it refines. Every runtime certificate the
 executable layer emits is upgraded here to a *theorem* about the honest
-`ℝ`-valued dynamics — with no unproved obligations remaining.
+`ℝ`- and `ℂ`-valued objects — with no unproved obligations remaining.
 
 All results in this folder depend only on the three standard Mathlib
 axioms: `propext`, `Classical.choice`, `Quot.sound` (no `sorryAx`, no
@@ -12,13 +13,13 @@ axioms: `propext`, `Classical.choice`, `Quot.sound` (no `sorryAx`, no
 
 ## The one-way bridge, and why
 
-`Computable.CReal ≃+* ℝ` exists as a ring/order isomorphism, but a
-*computable* `ℝ → CReal` cannot: Mathlib's `ℝ` erases its Cauchy moduli
-into `Prop`. So the architecture computes on the `FastReal` side and
-transfers **theorems** to `ℝ` via enclosure — never the reverse. The one
-irreducible cost of undecidability is the fueled `Option` layer: some
-comparisons honestly return `none`, and no result here ever claims
-otherwise.
+`Computable.CReal ≃+* ℝ` (and `CComplex ≃+* ℂ`) exists as a ring/order
+isomorphism, but a *computable* `ℝ → CReal` cannot: Mathlib's `ℝ` erases
+its Cauchy moduli into `Prop`. So the architecture computes on the
+`FastReal`/`FastComplex` side and transfers **theorems** to `ℝ`/`ℂ` via
+enclosure — never the reverse. The one irreducible cost of undecidability
+is the fueled `Option` layer: some comparisons honestly return `none`, and
+no result here ever claims otherwise.
 
 ## Files, bottom to top
 
@@ -33,6 +34,9 @@ otherwise.
 | `GibbsSound.lean` | `ofInterval_encloses`; **`decideBernoulli?_sound`** and `gibbsSiteUpdate?_sound` — the sampler samples the true Bernoulli distribution (conditional on a sound probability approximator). |
 | `InvSound.lean` | Directed division bounds; **`Ball.inv?_sound`**; `logistic?_sound` modulo `exp`. |
 | `ExpSound.lean` | `taylor_sound` + `Ball.exp_sound` (conditional on the `expExits` certificate); the honest finding that `Ball.exp`'s tolerance is vacuous at practical precisions; the repair **`expV`** with *unconditional* `expV_sound`; and the closing theorems `gibbsSiteUpdateV?_sound` / `gibbsSweepV?_sound` — the verified Gibbs chain **is** the classical Gibbs chain, sample for sample. |
+| `SqrtSound.lean` | Directed dyadic-root bounds (`sqrt_toRat_le` / `le_sqrtUp_toRat`) via `Nat.sqrt` bracketing; **`FastReal.sqrt_sound`** — the executable √ encloses `Real.sqrt` (unconditional; no series tail). Completes the primitive set. |
+| `FastComplexSound.lean` | Componentwise `FastComplex.Encloses`; `add`/`mul`/`conj`/`pow`_encloses; `normSq_encloses`; **`abs_encloses`** (√(re²+im²) encloses `‖c‖`); `eqCF_sound` — the `ℂ` equality certificate (no order on `ℂ`). |
+| `FastMatrixSound.lean` | Entrywise `FastMatrix.Encloses`; `sumFin`/`mul`/`conjTranspose`_encloses; `certSmallC_sound`; **`unitaryUpTo_sound`** — a `true` unitarity certificate proves the `ℂ`-matrix is unitary to `2^{-tol}`. Demo: a Hadamard beam splitter certifies `true`. |
 
 ## What is proved, in one line each
 
@@ -43,9 +47,21 @@ otherwise.
 - **Stochastic dynamics** (`ExpSound.gibbsSweepV?_sound`): a decided
   verified Gibbs sweep encloses, state by state, the classical Gibbs
   trajectory driven by the same uniform samples.
+- **Complex unitarity** (`FastMatrixSound.unitaryUpTo_sound`): a `true`
+  executable unitarity certificate proves the enclosed Mathlib `ℂ`-matrix
+  satisfies `|(M·Mᴴ − 1)ᵢⱼ| < 2^{-tol}` entrywise — rigorous optics.
 
-Both are unconditional: every hypothesis is an enclosure built structurally
-from numeric literals and ring operations.
+The first two are unconditional; the third is conditional only on the
+input matrix enclosing `M` (which holds by construction for literal
+amplitudes and the verified `√`). Every hypothesis is an enclosure built
+structurally from numeric literals and ring operations.
+
+## Coverage: the verified executable primitive set
+
+`compare`, `+`, `−`, `neg`, `*` (`Refinement`/`Preservation`); `inv?`
+(`InvSound`); `exp` (`ExpSound`, via `expV`); `√` (`SqrtSound`) — over
+`ℝ`. Complex `+`/`−`/`*`/`conj`/`pow`/`normSq`/`abs` and matrix
+`mul`/`conjTranspose` over `ℂ` (`FastComplexSound`/`FastMatrixSound`).
 
 ## The honest asterisk
 
