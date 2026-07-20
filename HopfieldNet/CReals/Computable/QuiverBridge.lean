@@ -3,6 +3,7 @@ Copyright (c) 2026 Michail Karatarakis. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Michail Karatarakis
 -/
+import ComputableReals.FoldSum
 import HopfieldNet.CReals.Computable.EnergySound
 import HopfieldNet.Quiver.HN.Core
 
@@ -61,36 +62,6 @@ theorem signStep_sound {net θv : FastReal} {netR θR : ℝ} {curr : FastReal}
 
 /-! ## Folds versus `∑` -/
 
-section Sums
-
-variable {M : Type} [AddCommMonoid M] {n : ℕ}
-
-private lemma foldl_add_eq_sum {α : Type} (f : α → M) :
-    ∀ (l : List α) (init : M),
-      l.foldl (fun acc v => acc + f v) init = init + (l.map f).sum := by
-  intro l
-  induction l with
-  | nil => intro init; simp
-  | cons a t ih => intro init; simp [ih, add_assoc]
-
-/-- A `finRange` fold of additions is a `∑`. -/
-theorem finRange_foldl_add_eq_sum (f : Fin n → M) :
-    (List.finRange n).foldl (fun acc v => acc + f v) 0 = ∑ v, f v := by
-  rw [foldl_add_eq_sum, zero_add, ← List.ofFn_eq_map, List.sum_ofFn]
-
-/-- A guarded `finRange` fold of additions is a filtered `∑`. -/
-theorem finRange_foldl_ite_add_eq_sum (p : Fin n → Prop) [DecidablePred p]
-    (f : Fin n → M) :
-    (List.finRange n).foldl (fun acc v => if p v then acc + f v else acc) 0
-      = ∑ v ∈ Finset.univ.filter p, f v := by
-  have hfun : (fun (acc : M) v => if p v then acc + f v else acc)
-      = fun acc v => acc + (if p v then f v else 0) := by
-    funext acc v
-    split <;> simp
-  rw [hfun, finRange_foldl_add_eq_sum]
-  exact (Finset.sum_filter _ _).symm
-
-end Sums
 
 /-! ## The fold twins agree with the Quiver energy -/
 
@@ -102,11 +73,11 @@ private instance : Nonempty (Fin n) := ⟨⟨0, Nat.pos_of_neZero n⟩⟩
 
 theorem netR_eq_sum (wR : Matrix (Fin n) (Fin n) ℝ) (actR : Fin n → ℝ) (u : Fin n) :
     netR wR actR u = ∑ v ∈ Finset.univ.filter (fun v => v ≠ u), wR u v * actR v :=
-  finRange_foldl_ite_add_eq_sum _ _
+  Sums.finRange_foldl_ite_add_eq_sum _ _
 
 theorem EθR_eq_sum (θR actR : Fin n → ℝ) :
     EθR θR actR = ∑ u, θR u * actR u :=
-  finRange_foldl_add_eq_sum _
+  Sums.finRange_foldl_add_eq_sum _
 
 /-- The fold-defined real energy is the Quiver Hopfield energy
 `NeuralNetwork.State.E`. -/
@@ -117,7 +88,7 @@ theorem ER_eq_E (pR : Params (HopfieldNetwork ℝ (Fin n)))
   congr 1
   · -- weight part
     unfold EwR NeuralNetwork.State.Ew
-    rw [finRange_foldl_add_eq_sum]
+    rw [Sums.finRange_foldl_add_eq_sum]
     have hsum : ∑ u, st.act u * netR pR.w st.act u
         = ∑ u, ∑ v ∈ Finset.univ.filter (fun v => v ≠ u), pR.w u v * st.act u * st.act v := by
       refine Finset.sum_congr rfl fun u _ => ?_
@@ -162,7 +133,7 @@ theorem net_encloses {pF : Params (HopfieldFast n)}
   have hnetR : sR.net pR u
       = (List.finRange n).foldl (fun acc v => acc + pR.w u v * sR.act v) 0 := by
     show HNfnet u (pR.w u) (fun v => sR.out v) = _
-    rw [HNfnet_eq u (pR.w u) _ (wR_diag_zero pR u), finRange_foldl_add_eq_sum]
+    rw [HNfnet_eq u (pR.w u) _ (wR_diag_zero pR u), Sums.finRange_foldl_add_eq_sum]
     rfl
   rw [hnetR]
   show ((List.finRange n).foldl (fun acc v => acc + pF.w u v * s.act v) 0).Encloses _

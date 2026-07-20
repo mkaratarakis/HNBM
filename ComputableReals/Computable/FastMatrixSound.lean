@@ -4,7 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Michail Karatarakis
 -/
 import ComputableReals.Computable.FastComplexSound
-import HopfieldNet.CReals.Computable.QuiverBridge
+import ComputableReals.FoldSum
 import ComputableReals.Computable.ExpSound
 import ComputableReals.FastComplexMatrix
 import Mathlib.LinearAlgebra.Matrix.ConjTranspose
@@ -17,7 +17,7 @@ The capstone of the complex refinement layer. `FastMatrix m n` is a grid of
 operation reduces to `FastComplexSound`:
 
 * `sumFin_encloses` — the fold-sum encloses `∑` (bridged through
-  `QuiverBridge.finRange_foldl_add_eq_sum` on `ℂ`);
+  `Sums.finRange_foldl_add_eq_sum` on `ℂ`);
 * `mul_encloses` / `conjTranspose_encloses` / `one_encloses` /
   `sub_encloses` — matrix algebra;
 * `certSmallC_sound` — the executable `|z| < 2^{-tol}` bound is sound:
@@ -57,7 +57,7 @@ theorem sumFin_encloses {f : Fin n → FastComplex} {g : Fin n → ℂ}
   have hz : (FastMatrix.sumFin f).Encloses
       ((List.finRange n).foldl (fun acc k => acc + g k) 0) :=
     hfold (List.finRange n) FastComplex.encloses_zero
-  rwa [QuiverBridge.finRange_foldl_add_eq_sum g] at hz
+  rwa [Sums.finRange_foldl_add_eq_sum g] at hz
 
 /-- Matrix multiplication preserves enclosure. -/
 theorem mul_encloses {A : FastMatrix m n} {B : FastMatrix n p}

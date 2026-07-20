@@ -26,7 +26,6 @@ import HopfieldNet.CReals.Computable.FastEnergy
 import HopfieldNet.CReals.Computable.EnergySound
 import HopfieldNet.CReals.Computable.QuiverBridge
 import HopfieldNet.CReals.Computable.NNGibbs
-import HopfieldNet.CReals.Computable.FastMatrixSound
 import HopfieldNet.CReals.Computable.Demos.ContrastiveDivergence
 import HopfieldNet.TSAux
 import HopfieldNet.aux

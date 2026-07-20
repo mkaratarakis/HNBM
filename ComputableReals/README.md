@@ -13,7 +13,7 @@ Boltzmann material that uses it stays behind in `HopfieldNet/CReals/`.
 lake build ComputableReals
 ```
 
-45 modules, ~15,000 lines, **zero `sorry`s**.
+47 modules, ~15,000 lines, **zero `sorry`s**.
 
 ## The three layers
 
@@ -52,8 +52,32 @@ enclosure through each operation. Note `ExpSound.expV`: an *unconditional*
 verified exponential, repairing the fact that `Ball.exp`'s tolerance exit never
 fires at practical precisions.
 
-Complex arithmetic (`CComplex*.lean`, `FastComplex*.lean`) mirrors the same
-three-layer structure.
+## Complex arithmetic and the optics stack
+
+Complex numbers mirror the same three layers: `CComplex*.lean` on the
+specification side, `FastComplex*.lean` on the executable side, and
+`Computable/FastComplexSound.lean`, `FastComplexDivSound.lean` and
+`TrigSound.lean` connecting them (the last gives verified `sin`/`cos` and
+hence the phase factor `e^{iφ}`).
+
+On top of that sits the linear-algebra layer that photonics needs:
+
+- `FastComplexMatrix.lean` — executable complex matrices with `mul`,
+  `mulVec`, `conjTranspose`, the Kronecker product `kron`, and the
+  certificate `unitaryUpTo`, which checks `U†U = I` to a given precision and
+  answers honestly (`false` when it cannot certify).
+- `Computable/FastMatrixSound.lean` — the enclosure relation for matrices
+  and the theorems carrying it through the operations, so a `unitaryUpTo`
+  certificate is a statement about the true complex matrix rather than about
+  floating-point residue.
+- `FastComplexMatrixExamples.lean` — a beam splitter and a phase shifter,
+  their composition `UPU φ`, and Kronecker products of unitaries, all
+  certified unitary; plus a deliberate negative test (`2·U` is not unitary,
+  certificate `false`).
+
+A beam splitter composed with a phase shifter, verified unitary and
+evaluated at arbitrary precision, is a two-mode interferometer — the base
+case for the optics work this library is intended to support.
 
 ## Relationship to the Hopfield/Boltzmann layer
 
@@ -71,6 +95,7 @@ dropped, and the theorems kept their names:
 | generic half (here) | network half (`HopfieldNet/CReals/`) |
 |---|---|
 | `Refinement.lean` — Dyadic order, `Encloses`, `compare`/`leF`/`eqF` soundness | `descentCertified?_sound` → `Computable/EnergySound.lean` |
+| `FoldSum.lean` — `finRange` folds are `∑` (pure `AddCommMonoid` facts) | the Quiver energy rewrites → `Computable/QuiverBridge.lean` |
 | `ExpSound.lean` — Taylor/squaring bounds, `expV`, verified logistic | Gibbs samplers → `Computable/NNGibbs.lean` |
 | `FastLogistic.lean` — `logistic?`, `probPos?`, `decideBernoulli?` | Gibbs updates → `Computable/NNGibbs.lean` |
 | `GibbsSound.lean` — `ofInterval_encloses`, `decideBernoulli?_sound` | `gibbsSiteUpdate?_sound` → `Computable/NNGibbs.lean` |
