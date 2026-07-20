@@ -247,7 +247,7 @@ private lemma round_err_bound (m : Dyadic) (prec : ℤ) :
     |((m.round prec).toRat - m.toRat)| ≤
       (Dyadic.toRat (if m.round prec == m then (⟨0, 0⟩ : Dyadic) else ⟨1, prec - 1⟩)) := by
   by_cases hb : m.round prec = m
-  · simp [hb, beq_iff_eq, Dyadic.toRat]
+  · simp [hb, Dyadic.toRat]
   · rw [if_neg (by simpa [beq_iff_eq] using hb)]
     have : Dyadic.toRat ⟨1, prec - 1⟩ = (2 : ℚ) ^ (prec - 1) := by
       simp [Dyadic.toRat]
@@ -403,7 +403,7 @@ theorem sub_encloses {x y : FastReal} {r s : ℝ}
 
 theorem mul_encloses {x y : FastReal} {r s : ℝ}
     (hx : x.Encloses r) (hy : y.Encloses s) :
-    (x * y).Encloses (r * s) := fun n =>
+    (x * y).Encloses (r * s) := fun _ =>
   Ball.mul_encloses _ (hx _) (hy _)
 
 /-- Numeric literals enclose themselves. -/

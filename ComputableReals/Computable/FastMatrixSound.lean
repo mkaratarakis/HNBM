@@ -162,10 +162,8 @@ theorem mulVec_encloses {A : FastMatrix m n} {M : Matrix (Fin m) (Fin n) ℂ}
     VecEncloses (A.mulVec v) (M.mulVec w) := by
   intro i
   show (FastMatrix.sumFin (fun k => A i k * v k)).Encloses ((M.mulVec w) i)
-  have : (M.mulVec w) i = ∑ k, M i k * w k := by
-    simp [Matrix.mulVec, dotProduct]
-  rw [this]
-  exact sumFin_encloses (fun k => FastComplex.mul_encloses (hA i k) (hv k))
+  simpa [Matrix.mulVec, dotProduct] using
+    sumFin_encloses fun k => FastComplex.mul_encloses (hA i k) (hv k)
 
 /-- A vector of literals encloses itself entrywise (convenience wrapper). -/
 theorem vecEncloses_of (v : Fin n → FastComplex) (w : Fin n → ℂ)
@@ -200,11 +198,8 @@ theorem transpose_encloses {A : FastMatrix m n} {M : Matrix (Fin m) (Fin n) ℂ}
 
 /-- The trace encloses Mathlib's trace. -/
 theorem trace_encloses {A : FastMatrix n n} {M : Matrix (Fin n) (Fin n) ℂ}
-    (hA : A.Encloses M) : (FastMatrix.trace A).Encloses (Matrix.trace M) := by
-  show (FastMatrix.sumFin (fun i => A i i)).Encloses (Matrix.trace M)
-  have : Matrix.trace M = ∑ i, M i i := rfl
-  rw [this]
-  exact sumFin_encloses (fun i => hA i i)
+    (hA : A.Encloses M) : (FastMatrix.trace A).Encloses (Matrix.trace M) :=
+  sumFin_encloses fun i => hA i i
 
 /-! ## Kronecker product: composing optical modes
 
@@ -226,7 +221,7 @@ theorem kron_encloses {A : FastMatrix m n} {B : FastMatrix p q}
     {MA : Matrix (Fin m) (Fin n) ℂ} {MB : Matrix (Fin p) (Fin q) ℂ}
     (hA : A.Encloses MA) (hB : B.Encloses MB) :
     (A.kron B).Encloses (kronM MA MB) :=
-  fun i j => FastComplex.mul_encloses (hA _ _) (hB _ _)
+  fun i j => FastComplex.mul_encloses (hA i.divNat j.divNat) (hB i.modNat j.modNat)
 
 /-- `kronM` really is the entrywise Kronecker rule. -/
 @[simp] theorem kronM_apply (MA : Matrix (Fin m) (Fin n) ℂ)
@@ -238,13 +233,13 @@ theorem kron_encloses {A : FastMatrix m n} {B : FastMatrix p q}
 /-- Enclosure only depends on the entries, so it transfers along entrywise
 equality of the executable matrices. -/
 theorem Encloses.congr {A B : FastMatrix m n} {M : Matrix (Fin m) (Fin n) ℂ}
-    (hA : A.Encloses M) (h : ∀ i j, A i j = B i j) : B.Encloses M := by
-  intro i j; rw [← h i j]; exact hA i j
+    (hA : A.Encloses M) (h : ∀ i j, A i j = B i j) : B.Encloses M :=
+  fun i j => h i j ▸ hA i j
 
 /-- Enclosure transfers along entrywise equality of the enclosed matrices. -/
 theorem Encloses.congr_right {A : FastMatrix m n} {M N : Matrix (Fin m) (Fin n) ℂ}
-    (hA : A.Encloses M) (h : ∀ i j, M i j = N i j) : A.Encloses N := by
-  intro i j; rw [← h i j]; exact hA i j
+    (hA : A.Encloses M) (h : ∀ i j, M i j = N i j) : A.Encloses N :=
+  fun i j => h i j ▸ hA i j
 
 /-! ## Demo: a balanced beam splitter is certifiably unitary
 

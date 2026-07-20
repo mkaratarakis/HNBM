@@ -132,7 +132,7 @@ private lemma sqrtValFloor_le {d : Dyadic} (hd : 0 ≤ d.man) (prec : ℤ) :
     unfold Vr
     rw [← zpow_natCast (2 : ℝ) (d.exp - 2 * prec).toNat, Int.toNat_of_nonneg hsh]
   · simp only [hsh, if_false]
-    push_neg at hsh
+    rw [not_le] at hsh
     set k : ℕ := (-(d.exp - 2 * prec)).toNat with hk
     have hkcast : (k : ℤ) = -(d.exp - 2 * prec) := Int.toNat_of_nonneg (by omega)
     have hval : (d.man >>> k : ℤ) = d.man / 2 ^ k := by
@@ -147,7 +147,7 @@ private lemma sqrtValFloor_le {d : Dyadic} (hd : 0 ≤ d.man) (prec : ℤ) :
       rw [he, zpow_neg, zpow_natCast, div_eq_mul_inv]
     rw [hVeq, le_div_iff₀ hdenpos]
     have hmul : (d.man / 2 ^ k : ℤ) * 2 ^ k ≤ d.man := by
-      have := Int.ediv_add_emod d.man (2 ^ k)
+      have := Int.mul_ediv_add_emod d.man (2 ^ k)
       have hr : 0 ≤ d.man % 2 ^ k := Int.emod_nonneg _ (by positivity)
       nlinarith [this, hr]
     calc ((d.man / 2 ^ k : ℤ) : ℝ) * (2 ^ k : ℝ)
@@ -169,7 +169,7 @@ private lemma le_sqrtValCeil {d : Dyadic} (hd : 0 ≤ d.man) (prec : ℤ) :
     unfold Vr
     rw [← zpow_natCast (2 : ℝ) (d.exp - 2 * prec).toNat, Int.toNat_of_nonneg hsh]
   · simp only [hsh, if_false]
-    push_neg at hsh
+    rw [not_le] at hsh
     set k : ℕ := (-(d.exp - 2 * prec)).toNat with hk
     have hkcast : (k : ℤ) = -(d.exp - 2 * prec) := Int.toNat_of_nonneg (by omega)
     have hpow2 : ((1 : ℤ) <<< k) = 2 ^ k := by rw [Int.shiftLeft_eq]; ring
@@ -199,7 +199,7 @@ private lemma le_sqrtValCeil {d : Dyadic} (hd : 0 ≤ d.man) (prec : ℤ) :
       rw [hqval]
       have hcomm : (2 ^ k : ℤ) * (d.man / 2 ^ k) = (d.man / 2 ^ k) * 2 ^ k := by ring
       have hdm : (d.man / 2 ^ k) * 2 ^ k + d.man % 2 ^ k = d.man := by
-        have := Int.ediv_add_emod d.man (2 ^ k); linarith [hcomm]
+        have := Int.mul_ediv_add_emod d.man (2 ^ k); linarith [hcomm]
       have hrlt : d.man % 2 ^ k < 2 ^ k := Int.emod_lt_of_pos _ (by positivity)
       have hexpand : (d.man / 2 ^ k + 1) * 2 ^ k = (d.man / 2 ^ k) * 2 ^ k + 2 ^ k := by ring
       rw [hexpand]; linarith
@@ -262,7 +262,7 @@ theorem sqrt_sound {x : Ball} {r : ℝ} (hx : x.Encloses r) (hr : 0 ≤ r)
   have hhi : r ≤ ((x.hi.toRat : ℚ) : ℝ) := by rw [hhival]; exact hx.2
   have hhi_man : 0 ≤ x.hi.man := by
     by_contra hneg
-    push_neg at hneg
+    rw [not_le] at hneg
     have h1 : x.hi.toRat < 0 := Dyadic.toRat_neg_of_man_neg hneg
     have h2 : ((x.hi.toRat : ℚ) : ℝ) < 0 := by exact_mod_cast h1
     linarith

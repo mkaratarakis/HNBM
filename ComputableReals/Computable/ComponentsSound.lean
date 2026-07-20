@@ -111,8 +111,7 @@ private theorem mul_unitary {A B : Matrix (Fin 2) (Fin 2) ℂ}
 theorem bsM_unitary : bsM * bsMᴴ = 1 := by
   ext i j
   fin_cases i <;> fin_cases j <;>
-    simp [bsM, Matrix.mul_apply, Matrix.conjTranspose_apply, Fin.sum_univ_two,
-      Matrix.one_apply] <;>
+    simp [bsM, Matrix.mul_apply, Matrix.conjTranspose_apply, Fin.sum_univ_two] <;>
     rw [inv_sqrt2_sq] <;> norm_num
 
 /-! ## The phase shifter -/
@@ -163,8 +162,7 @@ theorem psM_unitary (φR : ℝ) : psM φR * (psM φR)ᴴ = 1 := by
     rw [hz, Complex.exp_zero]
   ext i j
   fin_cases i <;> fin_cases j <;>
-    simp [psM, Matrix.mul_apply, Matrix.conjTranspose_apply, Fin.sum_univ_two,
-      Matrix.one_apply, habs]
+    simp [psM, Matrix.mul_apply, Matrix.conjTranspose_apply, habs]
 
 /-! ## A Mach–Zehnder-style composite
 

@@ -512,6 +512,9 @@ noncomputable instance : IsStrictOrderedRing CReal := by
   -- all required mixins are now available
   exact IsStrictOrderedRing.mk
 
+-- (`ConditionallyCompleteLinearOrderedField` is deprecated upstream; the three
+-- component instances above are what consumers should use.)
+set_option linter.deprecated false in
 noncomputable instance : ConditionallyCompleteLinearOrderedField CReal := by
   classical
   exact

@@ -44,40 +44,30 @@ def EnclosesC (z : FastComplex) (w : Computable.CComplex) : Prop :=
 /-! ## Arithmetic refines arithmetic -/
 
 theorem enclosesC_zero : (0 : FastComplex).EnclosesC 0 := by
-  unfold EnclosesC; rw [Computable.CComplex.toComplex_zero]; exact encloses_zero
+  simpa [EnclosesC] using encloses_zero
 
 theorem enclosesC_one : (1 : FastComplex).EnclosesC 1 := by
-  unfold EnclosesC; rw [Computable.CComplex.toComplex_one]; exact encloses_one
+  simpa [EnclosesC] using encloses_one
 
 theorem add_enclosesC {z w : FastComplex} {a b : Computable.CComplex}
     (hz : z.EnclosesC a) (hw : w.EnclosesC b) : (z + w).EnclosesC (a + b) := by
-  unfold EnclosesC at *
-  rw [Computable.CComplex.toComplex_add]
-  exact add_encloses hz hw
+  simpa [EnclosesC] using add_encloses hz hw
 
 theorem mul_enclosesC {z w : FastComplex} {a b : Computable.CComplex}
     (hz : z.EnclosesC a) (hw : w.EnclosesC b) : (z * w).EnclosesC (a * b) := by
-  unfold EnclosesC at *
-  rw [Computable.CComplex.toComplex_mul]
-  exact mul_encloses hz hw
+  simpa [EnclosesC] using mul_encloses hz hw
 
 theorem neg_enclosesC {z : FastComplex} {a : Computable.CComplex}
     (hz : z.EnclosesC a) : (FastComplex.neg z).EnclosesC (-a) := by
-  unfold EnclosesC at *
-  rw [Computable.CComplex.toComplex_neg]
-  exact neg_encloses hz
+  simpa [EnclosesC] using neg_encloses hz
 
 theorem sub_enclosesC {z w : FastComplex} {a b : Computable.CComplex}
     (hz : z.EnclosesC a) (hw : w.EnclosesC b) : (z - w).EnclosesC (a - b) := by
-  unfold EnclosesC at *
-  rw [Computable.CComplex.toComplex_sub]
-  exact sub_encloses hz hw
+  simpa [EnclosesC] using sub_encloses hz hw
 
 theorem pow_enclosesC {z : FastComplex} {a : Computable.CComplex} (n : ℕ)
     (hz : z.EnclosesC a) : (z ^ n).EnclosesC (a ^ n) := by
-  unfold EnclosesC at *
-  rw [Computable.CComplex.toComplex_pow]
-  exact pow_encloses hz n
+  simpa [EnclosesC] using pow_encloses hz n
 
 /-! ## The verified transcendental functions refine the specification's
 
@@ -91,23 +81,17 @@ establishing the two anchors.
 /-- The verified complex exponential refines `CComplex.exp`. -/
 theorem expV_enclosesC {z : FastComplex} {a : Computable.CComplex}
     (hz : z.EnclosesC a) : (expV z).EnclosesC (Computable.CComplex.exp a) := by
-  unfold EnclosesC at *
-  rw [Computable.CComplex.toComplex_exp]
-  exact expV_sound hz
+  simpa [EnclosesC] using expV_sound hz
 
 /-- The verified complex cosine refines `CComplex.cos`. -/
 theorem cosV_enclosesC {z : FastComplex} {a : Computable.CComplex}
     (hz : z.EnclosesC a) : (cosV z).EnclosesC (Computable.CComplex.cos a) := by
-  unfold EnclosesC at *
-  rw [Computable.CComplex.toComplex_cos]
-  exact cosV_sound hz
+  simpa [EnclosesC] using cosV_sound hz
 
 /-- The verified complex sine refines `CComplex.sin`. -/
 theorem sinV_enclosesC {z : FastComplex} {a : Computable.CComplex}
     (hz : z.EnclosesC a) : (sinV z).EnclosesC (Computable.CComplex.sin a) := by
-  unfold EnclosesC at *
-  rw [Computable.CComplex.toComplex_sin]
-  exact sinV_sound hz
+  simpa [EnclosesC] using sinV_sound hz
 
 /-! ## Transfer
 

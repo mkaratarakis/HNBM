@@ -40,16 +40,9 @@ namespace FastComplex
 /-- Scaling a `FastComplex` by a `FastReal` preserves enclosure. -/
 theorem smul_encloses {x : FastReal} {r : ℝ} {z : FastComplex} {c : ℂ}
     (hx : x.Encloses r) (hz : z.Encloses c) :
-    (FastComplex.smul x z).Encloses ((r : ℂ) * c) := by
-  refine ⟨?_, ?_⟩
-  · show (x * z.re).Encloses (((r : ℂ) * c).re)
-    have : (((r : ℂ) * c).re) = r * c.re := by simp
-    rw [this]
-    exact FastReal.mul_encloses hx hz.1
-  · show (x * z.im).Encloses (((r : ℂ) * c).im)
-    have : (((r : ℂ) * c).im) = r * c.im := by simp
-    rw [this]
-    exact FastReal.mul_encloses hx hz.2
+    (FastComplex.smul x z).Encloses ((r : ℂ) * c) :=
+  ⟨by simpa using FastReal.mul_encloses hx hz.1,
+   by simpa using FastReal.mul_encloses hx hz.2⟩
 
 /-! ## The verified complex exponential
 
@@ -110,16 +103,8 @@ def mulI (z : FastComplex) : FastComplex :=
   { re := FastReal.neg z.im, im := z.re }
 
 theorem mulI_encloses {z : FastComplex} {c : ℂ} (hz : z.Encloses c) :
-    (mulI z).Encloses (Complex.I * c) := by
-  refine ⟨?_, ?_⟩
-  · show (FastReal.neg z.im).Encloses ((Complex.I * c).re)
-    have : ((Complex.I * c).re) = -c.im := by simp
-    rw [this]
-    exact FastReal.neg_encloses hz.2
-  · show z.re.Encloses ((Complex.I * c).im)
-    have : ((Complex.I * c).im) = c.re := by simp
-    rw [this]
-    exact hz.1
+    (mulI z).Encloses (Complex.I * c) :=
+  ⟨by simpa using FastReal.neg_encloses hz.2, by simpa using hz.1⟩
 
 /-- Halving, executably (exact: multiplication by the dyadic `2⁻¹`). -/
 def half (z : FastComplex) : FastComplex :=
@@ -132,10 +117,7 @@ theorem half_encloses {z : FastComplex} {c : ℂ} (hz : z.Encloses c) :
     have hv : ((Dyadic.toRat ⟨1, -1⟩ : ℚ) : ℝ) = (1 : ℝ) / 2 := by
       norm_num [Dyadic.toRat]
     rwa [hv] at h
-  have := smul_encloses hd hz
-  have hc : (((1 : ℝ) / 2 : ℝ) : ℂ) * c = c / 2 := by
-    push_cast; ring
-  rwa [hc] at this
+  simpa [div_eq_mul_inv, mul_comm] using smul_encloses hd hz
 
 /-- The verified complex cosine, `cos z = (e^{iz} + e^{-iz}) / 2`. -/
 def cosV (z : FastComplex) : FastComplex :=
@@ -149,11 +131,8 @@ theorem cosV_sound {z : FastComplex} {c : ℂ} (hz : z.Encloses c) :
   have h2 : (expV (FastComplex.neg (mulI z))).Encloses (Complex.exp (-(Complex.I * c))) :=
     expV_sound (neg_encloses (mulI_encloses hz))
   have hsum := half_encloses (add_encloses h1 h2)
-  have hcos : (Complex.exp (Complex.I * c) + Complex.exp (-(Complex.I * c))) / 2
-      = Complex.cos c := by
-    rw [Complex.cos]
-    ring_nf
-  rwa [hcos] at hsum
+  rwa [show (Complex.exp (Complex.I * c) + Complex.exp (-(Complex.I * c))) / 2
+    = Complex.cos c from by rw [Complex.cos]; ring_nf] at hsum
 
 /-- The verified complex sine, `sin z = (e^{-iz} - e^{iz})·i / 2`. -/
 def sinV (z : FastComplex) : FastComplex :=
@@ -169,11 +148,8 @@ theorem sinV_sound {z : FastComplex} {c : ℂ} (hz : z.Encloses c) :
   have hd := sub_encloses h1 h2
   have hm := mulI_encloses hd
   have hh := half_encloses hm
-  have hsin : Complex.I * (Complex.exp (-(Complex.I * c)) - Complex.exp (Complex.I * c)) / 2
-      = Complex.sin c := by
-    rw [Complex.sin]
-    ring_nf
-  rwa [hsin] at hh
+  rwa [show Complex.I * (Complex.exp (-(Complex.I * c)) - Complex.exp (Complex.I * c)) / 2
+    = Complex.sin c from by rw [Complex.sin]; ring_nf] at hh
 
 end FastComplex
 

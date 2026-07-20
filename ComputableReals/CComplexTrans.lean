@@ -113,12 +113,8 @@ each function; `toComplex_injective` plus `simp` discharges them uniformly.
 theorem exp_add (z w : CComplex) : exp (z + w) = exp z * exp w := by
   apply toComplex_injective; simp [Complex.exp_add]
 
-@[simp] theorem exp_ne_zero (z : CComplex) : exp z ≠ 0 := by
-  intro h
-  have hc := congrArg toComplex h
-  rw [toComplex_exp] at hc
-  simp only [toComplex_zero] at hc
-  exact Complex.exp_ne_zero _ hc
+@[simp] theorem exp_ne_zero (z : CComplex) : exp z ≠ 0 := fun h =>
+  Complex.exp_ne_zero (toComplex z) (by simpa using congrArg toComplex h)
 
 @[simp] theorem cos_zero : cos 0 = 1 := by
   apply toComplex_injective; simp

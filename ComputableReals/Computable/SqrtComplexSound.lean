@@ -56,21 +56,11 @@ private theorem sgnIm_mul_abs (c : ℂ) : sgnIm c * |c.im| = c.im := by
   · rw [abs_of_neg h]; ring
   · rw [abs_of_nonneg (not_lt.mp h)]; ring
 
-private theorem re_le_norm (c : ℂ) : |c.re| ≤ ‖c‖ := by
-  rw [Complex.norm_def, Complex.normSq_apply]
-  have h : c.re * c.re ≤ c.re * c.re + c.im * c.im := by nlinarith [mul_self_nonneg c.im]
-  calc |c.re| = Real.sqrt (c.re * c.re) := by rw [Real.sqrt_mul_self_eq_abs]
-    _ ≤ _ := Real.sqrt_le_sqrt h
-
 private theorem half_add_nonneg (c : ℂ) : 0 ≤ (‖c‖ + c.re) / 2 := by
-  have := re_le_norm c
-  have h : -‖c‖ ≤ c.re := neg_le_of_abs_le this
-  linarith
+  have := neg_le_of_abs_le (Complex.abs_re_le_norm c); linarith
 
 private theorem half_sub_nonneg (c : ℂ) : 0 ≤ (‖c‖ - c.re) / 2 := by
-  have := re_le_norm c
-  have h : c.re ≤ ‖c‖ := le_of_abs_le this
-  linarith
+  have := le_of_abs_le (Complex.abs_re_le_norm c); linarith
 
 /-- The principal square root of a complex number, in closed form. -/
 noncomputable def principalSqrt (c : ℂ) : ℂ :=
@@ -81,8 +71,7 @@ noncomputable def principalSqrt (c : ℂ) : ℂ :=
 private theorem radicand_mul (c : ℂ) :
     (‖c‖ + c.re) / 2 * ((‖c‖ - c.re) / 2) = (c.im / 2) * (c.im / 2) := by
   have hnorm : ‖c‖ * ‖c‖ = c.re * c.re + c.im * c.im := by
-    rw [Complex.norm_def, Complex.normSq_apply]
-    exact Real.mul_self_sqrt (by nlinarith [mul_self_nonneg c.re, mul_self_nonneg c.im])
+    rw [Complex.norm_mul_self_eq_normSq, Complex.normSq_apply]
   nlinarith [hnorm]
 
 /-- **The principal square root really is a square root.** -/
