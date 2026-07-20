@@ -53,7 +53,8 @@ def ofPre (x : CReal.Pre) : CRealRep AQ where
       simpa [a, xn] using
         (ApproxRationals.abs_toRat_approxRat_sub_le (AQ := AQ) (q := x.approx (n + 2)) (n := n + 2))
     have hm_round : |xm - b| ≤ (1 : ℚ) / (2 ^ (m + 2)) := by
-      have := (ApproxRationals.abs_toRat_approxRat_sub_le (AQ := AQ) (q := x.approx (m + 2)) (n := m + 2))
+      have := (ApproxRationals.abs_toRat_approxRat_sub_le (AQ := AQ) (q := x.approx (m + 2)) (n := m
+        + 2))
       simpa [abs_sub_comm, b, xm] using this
     have hmid : |xn - xm| ≤ (1 : ℚ) / (2 ^ (n + 2)) := by
       have hnm' : n + 2 ≤ m + 2 := Nat.add_le_add_right hnm 2
@@ -195,7 +196,8 @@ protected def neg (x : CRealRep AQ) : CRealRep AQ where
             = |-(ApproxRationals.toRat (x.approx n) - ApproxRationals.toRat (x.approx m))| := by
                 simp [hr]
         _ = |ApproxRationals.toRat (x.approx n) - ApproxRationals.toRat (x.approx m)| := by
-              simpa using abs_neg (ApproxRationals.toRat (x.approx n) - ApproxRationals.toRat (x.approx m))
+              simpa using abs_neg (ApproxRationals.toRat (x.approx n) - ApproxRationals.toRat
+                (x.approx m))
     simpa [ApproxRationals.toRat_neg, habs] using h
 
 /-- Addition on representatives (spec-compatible, unrounded). -/
@@ -236,7 +238,8 @@ protected def compress (x : CRealRep AQ) : CRealRep AQ where
     set xn : ℚ := ApproxRationals.toRat (x.approx (n + 2))
     set xm : ℚ := ApproxRationals.toRat (x.approx (m + 2))
     have hn_round : |a - xn| ≤ (1 : ℚ) / (2 ^ (n + 2)) := by
-      simpa [a, xn] using (ApproxRationals.abs_toRat_approx_sub_le (AQ := AQ) (x.approx (n + 2)) (n + 2))
+      simpa [a, xn] using (ApproxRationals.abs_toRat_approx_sub_le (AQ := AQ) (x.approx (n + 2)) (n
+        + 2))
     have hm_round : |xm - b| ≤ (1 : ℚ) / (2 ^ (m + 2)) := by
       -- same inequality but symmetric
       have := (ApproxRationals.abs_toRat_approx_sub_le (AQ := AQ) (x.approx (m + 2)) (m + 2))
@@ -300,14 +303,18 @@ protected def addC (x y : CRealRep AQ) : CRealRep AQ where
     ApproxRationals.approx (x.approx (n + 2) + y.approx (n + 2)) (n + 2)
   is_regular := by
     intro n m hnm
-    set a : ℚ := ApproxRationals.toRat (ApproxRationals.approx (x.approx (n + 2) + y.approx (n + 2)) (n + 2))
-    set b : ℚ := ApproxRationals.toRat (ApproxRationals.approx (x.approx (m + 2) + y.approx (m + 2)) (m + 2))
+    set a : ℚ := ApproxRationals.toRat (ApproxRationals.approx (x.approx (n + 2) + y.approx (n + 2))
+      (n + 2))
+    set b : ℚ := ApproxRationals.toRat (ApproxRationals.approx (x.approx (m + 2) + y.approx (m + 2))
+      (m + 2))
     set sn : ℚ := ApproxRationals.toRat (x.approx (n + 2) + y.approx (n + 2))
     set sm : ℚ := ApproxRationals.toRat (x.approx (m + 2) + y.approx (m + 2))
     have hn_round : |a - sn| ≤ (1 : ℚ) / (2 ^ (n + 2)) := by
-      simpa [a, sn] using (ApproxRationals.abs_toRat_approx_sub_le (AQ := AQ) (x.approx (n + 2) + y.approx (n + 2)) (n + 2))
+      simpa [a, sn] using (ApproxRationals.abs_toRat_approx_sub_le (AQ := AQ) (x.approx (n + 2) +
+        y.approx (n + 2)) (n + 2))
     have hm_round : |sm - b| ≤ (1 : ℚ) / (2 ^ (m + 2)) := by
-      have := (ApproxRationals.abs_toRat_approx_sub_le (AQ := AQ) (x.approx (m + 2) + y.approx (m + 2)) (m + 2))
+      have := (ApproxRationals.abs_toRat_approx_sub_le (AQ := AQ) (x.approx (m + 2) + y.approx (m +
+        2)) (m + 2))
       simpa [abs_sub_comm, b, sm] using this
     have hmid : |sn - sm| ≤ (1 : ℚ) / (2 ^ (n + 1)) := by
       -- use regularity of the spec addition on `toPre`
@@ -332,9 +339,11 @@ protected def addC (x y : CRealRep AQ) : CRealRep AQ where
       have := one_div_le_one_div_of_le hpos hpow
       simpa [one_div, div_eq_mul_inv] using this
     have hm_round' : |sm - b| ≤ (1 : ℚ) / (2 ^ (n + 2)) := hm_round.trans h_pow_mon
-    have hsum : |a - sn| + |sn - sm| + |sm - b| ≤ (1 : ℚ) / (2 ^ (n + 2)) + (1 : ℚ) / (2 ^ (n + 1)) + (1 : ℚ) / (2 ^ (n + 2)) := by
+    have hsum : |a - sn| + |sn - sm| + |sm - b| ≤ (1 : ℚ) / (2 ^ (n + 2)) + (1 : ℚ) / (2 ^ (n + 1))
+      + (1 : ℚ) / (2 ^ (n + 2)) := by
       linarith [hn_round, hmid, hm_round']
-    have hclose : (1 : ℚ) / (2 ^ (n + 2)) + (1 : ℚ) / (2 ^ (n + 1)) + (1 : ℚ) / (2 ^ (n + 2)) ≤ (1 : ℚ) / (2 ^ n) := by
+    have hclose : (1 : ℚ) / (2 ^ (n + 2)) + (1 : ℚ) / (2 ^ (n + 1)) + (1 : ℚ) / (2 ^ (n + 2)) ≤ (1 :
+      ℚ) / (2 ^ n) := by
       -- `1/2^(n+1) + 2/2^(n+2) = 1/2^n`.
       ring_nf
       have : (1 : ℚ) / (2 ^ (n + 1)) + (1 : ℚ) / (2 ^ (n + 1)) = (1 : ℚ) / (2 ^ n) := by
@@ -353,14 +362,18 @@ protected def mulC (x y : CRealRep AQ) : CRealRep AQ where
   is_regular := by
     intro n m hnm
     let S := mulShift (AQ := AQ) x y
-    set a : ℚ := ApproxRationals.toRat (ApproxRationals.approx (x.approx (n + 2 + S) * y.approx (n + 2 + S)) (n + 2))
-    set b : ℚ := ApproxRationals.toRat (ApproxRationals.approx (x.approx (m + 2 + S) * y.approx (m + 2 + S)) (m + 2))
+    set a : ℚ := ApproxRationals.toRat (ApproxRationals.approx (x.approx (n + 2 + S) * y.approx (n +
+      2 + S)) (n + 2))
+    set b : ℚ := ApproxRationals.toRat (ApproxRationals.approx (x.approx (m + 2 + S) * y.approx (m +
+      2 + S)) (m + 2))
     set pn : ℚ := ApproxRationals.toRat (x.approx (n + 2 + S) * y.approx (n + 2 + S))
     set pm : ℚ := ApproxRationals.toRat (x.approx (m + 2 + S) * y.approx (m + 2 + S))
     have hn_round : |a - pn| ≤ (1 : ℚ) / (2 ^ (n + 2)) := by
-      simpa [a, pn] using (ApproxRationals.abs_toRat_approx_sub_le (AQ := AQ) (x.approx (n + 2 + S) * y.approx (n + 2 + S)) (n + 2))
+      simpa [a, pn] using (ApproxRationals.abs_toRat_approx_sub_le (AQ := AQ) (x.approx (n + 2 + S)
+        * y.approx (n + 2 + S)) (n + 2))
     have hm_round : |pm - b| ≤ (1 : ℚ) / (2 ^ (m + 2)) := by
-      have := (ApproxRationals.abs_toRat_approx_sub_le (AQ := AQ) (x.approx (m + 2 + S) * y.approx (m + 2 + S)) (m + 2))
+      have := (ApproxRationals.abs_toRat_approx_sub_le (AQ := AQ) (x.approx (m + 2 + S) * y.approx
+        (m + 2 + S)) (m + 2))
       simpa [abs_sub_comm, b, pm] using this
     have hmid : |pn - pm| ≤ (1 : ℚ) / (2 ^ (n + 1)) := by
       -- Use regularity of the spec multiplication at indices `n+2` and `m+2`,
@@ -378,8 +391,10 @@ protected def mulC (x y : CRealRep AQ) : CRealRep AQ where
         simpa [one_div, div_eq_mul_inv] using this
       exact hspec'.trans hmono
     have hab : |a - b| ≤ |a - pn| + |pn - pm| + |pm - b| := by
-      have h1 : |a - b| ≤ |a - pn| + |pn - b| := by exact abs_sub_le a pn b --abs_sub_abs_le_abs_sub a pn ▸ abs_sub_le a pn b
-      have h2 : |pn - b| ≤ |pn - pm| + |pm - b| := by exact abs_sub_le pn pm b --abs_sub_abs_le_abs_sub pn pm ▸ abs_sub_le pn pm b
+      have h1 : |a - b| ≤ |a - pn| + |pn - b| := by exact abs_sub_le a pn b
+        --abs_sub_abs_le_abs_sub a pn ▸ abs_sub_le a pn b
+      have h2 : |pn - b| ≤ |pn - pm| + |pm - b| := by exact abs_sub_le pn pm b
+        --abs_sub_abs_le_abs_sub pn pm ▸ abs_sub_le pn pm b
       --  simpa [sub_eq_add_neg, add_assoc, add_left_comm, add_comm] using (abs_sub_le pn pm b)
       linarith
     have h_pow_mon : (1 : ℚ) / (2 ^ (m + 2)) ≤ (1 : ℚ) / (2 ^ (n + 2)) := by
@@ -390,9 +405,11 @@ protected def mulC (x y : CRealRep AQ) : CRealRep AQ where
       have := one_div_le_one_div_of_le hpos hpow
       simpa [one_div, div_eq_mul_inv] using this
     have hm_round' : |pm - b| ≤ (1 : ℚ) / (2 ^ (n + 2)) := hm_round.trans h_pow_mon
-    have hsum : |a - pn| + |pn - pm| + |pm - b| ≤ (1 : ℚ) / (2 ^ (n + 2)) + (1 : ℚ) / (2 ^ (n + 1)) + (1 : ℚ) / (2 ^ (n + 2)) := by
+    have hsum : |a - pn| + |pn - pm| + |pm - b| ≤ (1 : ℚ) / (2 ^ (n + 2)) + (1 : ℚ) / (2 ^ (n + 1))
+      + (1 : ℚ) / (2 ^ (n + 2)) := by
       linarith [hn_round, hmid, hm_round']
-    have hclose : (1 : ℚ) / (2 ^ (n + 2)) + (1 : ℚ) / (2 ^ (n + 1)) + (1 : ℚ) / (2 ^ (n + 2)) ≤ (1 : ℚ) / (2 ^ n) := by
+    have hclose : (1 : ℚ) / (2 ^ (n + 2)) + (1 : ℚ) / (2 ^ (n + 1)) + (1 : ℚ) / (2 ^ (n + 2)) ≤ (1 :
+      ℚ) / (2 ^ n) := by
       ring_nf
       -- same as in `addC`
       have : (1 : ℚ) / (2 ^ (n + 1)) + (1 : ℚ) / (2 ^ (n + 1)) = (1 : ℚ) / (2 ^ n) := by
@@ -443,9 +460,11 @@ protected def invC (x : CRealRep AQ) (W : CReal.Pre.InvWitness x.toPre) : CRealR
       have := one_div_le_one_div_of_le hpos hpow
       simpa [one_div, div_eq_mul_inv] using this
     have hm_round' : |qm - b| ≤ (1 : ℚ) / (2 ^ (n + 2)) := hm_round.trans h_pow_mon
-    have hsum : |a - qn| + |qn - qm| + |qm - b| ≤ (1 : ℚ) / (2 ^ (n + 2)) + (1 : ℚ) / (2 ^ (n + 1)) + (1 : ℚ) / (2 ^ (n + 2)) := by
+    have hsum : |a - qn| + |qn - qm| + |qm - b| ≤ (1 : ℚ) / (2 ^ (n + 2)) + (1 : ℚ) / (2 ^ (n + 1))
+      + (1 : ℚ) / (2 ^ (n + 2)) := by
       linarith [hn_round, hmid, hm_round']
-    have hclose : (1 : ℚ) / (2 ^ (n + 2)) + (1 : ℚ) / (2 ^ (n + 1)) + (1 : ℚ) / (2 ^ (n + 2)) ≤ (1 : ℚ) / (2 ^ n) := by
+    have hclose : (1 : ℚ) / (2 ^ (n + 2)) + (1 : ℚ) / (2 ^ (n + 1)) + (1 : ℚ) / (2 ^ (n + 2)) ≤ (1 :
+      ℚ) / (2 ^ n) := by
       ring_nf
       have : (1 : ℚ) / (2 ^ (n + 1)) + (1 : ℚ) / (2 ^ (n + 1)) = (1 : ℚ) / (2 ^ n) := by
         simp [pow_succ, div_eq_mul_inv]; ring
@@ -454,7 +473,8 @@ protected def invC (x : CRealRep AQ) (W : CReal.Pre.InvWitness x.toPre) : CRealR
     -- Unfold the local abbreviations; we cannot unfold `invC` inside its own definition.
     simpa [u, qn, qm, a, b] using this
 
-@[inline] protected def divC (x y : CRealRep AQ) (Wy : CReal.Pre.InvWitness y.toPre) : CRealRep AQ :=
+@[inline] protected def divC (x y : CRealRep AQ) (Wy : CReal.Pre.InvWitness y.toPre) : CRealRep AQ
+  :=
   CRealRep.mulC x (CRealRep.invC y Wy)
 
 /-! ### Compatibility lemmas (projection correctness) -/
@@ -467,7 +487,8 @@ theorem toPre_one_equiv : CReal.Pre.Equiv (CRealRep.one (AQ := AQ)).toPre CReal.
   intro n
   simp [CRealRep.one, CRealRep.toPre, CReal.Pre.one]
 
-theorem toPre_neg_equiv (x : CRealRep AQ) : CReal.Pre.Equiv (CRealRep.neg x).toPre (CReal.Pre.neg x.toPre) := by
+theorem toPre_neg_equiv (x : CRealRep AQ) : CReal.Pre.Equiv (CRealRep.neg x).toPre (CReal.Pre.neg
+  x.toPre) := by
   intro n
   simp [CRealRep.neg, CRealRep.toPre, CReal.Pre.neg]
 
@@ -482,7 +503,8 @@ theorem toPre_mul_equiv (x y : CRealRep AQ) :
   simp [CRealRep.mul, CRealRep.toPre, CReal.Pre.mul, mulShift]
 
 /-- Compression is equivalent to the identity in the ℚ-specification model. -/
-theorem toPre_compress_equiv (x : CRealRep AQ) : CReal.Pre.Equiv (CRealRep.compress x).toPre x.toPre := by
+theorem toPre_compress_equiv (x : CRealRep AQ) : CReal.Pre.Equiv (CRealRep.compress x).toPre x.toPre
+  := by
   intro n
   -- compare at index `n+1`
   -- `compress` uses `x.approx (n+3)` rounded at precision `n+3`.
@@ -522,8 +544,10 @@ theorem toPre_addC_equiv (x y : CRealRep AQ) :
   set c : ℚ := (CReal.Pre.add x.toPre y.toPre).approx (n + 2)
   have h_round : |a - c| ≤ (1 : ℚ) / (2 ^ (n + 3)) := by
     -- `a` rounds the sum at precision `n+3`
-    simpa [CRealRep.addC, CRealRep.toPre, a, c, CReal.Pre.add, Nat.add_assoc, Nat.add_left_comm, Nat.add_comm] using
-      (ApproxRationals.abs_toRat_approx_sub_le (AQ := AQ) (x.approx (n + 3) + y.approx (n + 3)) (n + 3))
+    simpa [CRealRep.addC, CRealRep.toPre, a, c, CReal.Pre.add, Nat.add_assoc, Nat.add_left_comm,
+      Nat.add_comm] using
+      (ApproxRationals.abs_toRat_approx_sub_le (AQ := AQ) (x.approx (n + 3) + y.approx (n + 3)) (n +
+        3))
   have h_reg : |c - b| ≤ (1 : ℚ) / (2 ^ (n + 1)) := by
     have := (CReal.Pre.add x.toPre y.toPre).is_regular (n + 1) (n + 2) (by omega)
     simpa [b, c, abs_sub_comm] using this
@@ -596,7 +620,8 @@ theorem toPre_subC_equiv (x y : CRealRep AQ) :
     CReal.Pre.Equiv (CRealRep.subC x y).toPre (CReal.Pre.add x.toPre (CReal.Pre.neg y.toPre)) := by
   -- unfold `subC` and use the already-proved correctness lemmas.
   refine CReal.Pre.equiv_trans (toPre_addC_equiv (AQ := AQ) x (CRealRep.neg y)) ?_
-  have hy : CReal.Pre.Equiv (CRealRep.neg y).toPre (CReal.Pre.neg y.toPre) := toPre_neg_equiv (AQ := AQ) y
+  have hy : CReal.Pre.Equiv (CRealRep.neg y).toPre (CReal.Pre.neg y.toPre) := toPre_neg_equiv (AQ :=
+    AQ) y
   simpa using
     (CReal.add_respects_equiv (x₁ := x.toPre) (x₂ := x.toPre)
       (y₁ := (CRealRep.neg y).toPre) (y₂ := CReal.Pre.neg y.toPre) (CReal.Pre.equiv_refl _) hy)
@@ -611,7 +636,8 @@ theorem toPre_invC_equiv (x : CRealRep AQ) (W : CReal.Pre.InvWitness x.toPre) :
   set c : ℚ := u.approx (n + 2)
   have h_round : |a - c| ≤ (1 : ℚ) / (2 ^ (n + 3)) := by
     -- `a` rounds `u.approx (n+2)` at precision `n+3`.
-    simpa [CRealRep.invC, CRealRep.toPre, a, c, u, Nat.add_assoc, Nat.add_left_comm, Nat.add_comm] using
+    simpa [CRealRep.invC, CRealRep.toPre, a, c, u, Nat.add_assoc, Nat.add_left_comm, Nat.add_comm]
+      using
       (ApproxRationals.abs_toRat_approxRat_sub_le (AQ := AQ) (u.approx (n + 2)) (n + 3))
   have h_reg : |c - b| ≤ (1 : ℚ) / (2 ^ (n + 1)) := by
     have := u.is_regular (n + 1) (n + 2) (by omega)
@@ -630,14 +656,16 @@ theorem toPre_invC_equiv (x : CRealRep AQ) (W : CReal.Pre.InvWitness x.toPre) :
 
 /-- Rounded division agrees with spec division (implemented as `mul` + `inv`). -/
 theorem toPre_divC_equiv (x y : CRealRep AQ) (Wy : CReal.Pre.InvWitness y.toPre) :
-    CReal.Pre.Equiv (CRealRep.divC x y Wy).toPre (CReal.Pre.mul x.toPre (CReal.Pre.inv y.toPre Wy)) := by
+    CReal.Pre.Equiv (CRealRep.divC x y Wy).toPre (CReal.Pre.mul x.toPre (CReal.Pre.inv y.toPre Wy))
+      := by
   -- unfold `divC` and chain existing lemmas.
   refine CReal.Pre.equiv_trans (toPre_mulC_equiv (AQ := AQ) x (CRealRep.invC y Wy)) ?_
   have hy : CReal.Pre.Equiv (CRealRep.invC y Wy).toPre (CReal.Pre.inv y.toPre Wy) :=
     toPre_invC_equiv (AQ := AQ) y Wy
   simpa using
     (CReal.mul_respects_equiv (x₁ := x.toPre) (x₂ := x.toPre)
-      (y₁ := (CRealRep.invC y Wy).toPre) (y₂ := CReal.Pre.inv y.toPre Wy) (CReal.Pre.equiv_refl _) hy)
+      (y₁ := (CRealRep.invC y Wy).toPre) (y₂ := CReal.Pre.inv y.toPre Wy) (CReal.Pre.equiv_refl _)
+        hy)
 
 /-! ### Transport of “respects equivalence” theorems from the ℚ-specification -/
 
@@ -651,13 +679,15 @@ theorem addC_respects_equiv {x₁ x₂ y₁ y₂ : CRealRep AQ} (hx : x₁ ≈�
   -- (addC x₁ y₁).toPre ≈ add x₁.toPre y₁.toPre ≈ add x₂.toPre y₂.toPre ≈ (addC x₂ y₂).toPre
   refine CReal.Pre.equiv_trans (toPre_addC_equiv (AQ := AQ) x₁ y₁) ?_
   refine CReal.Pre.equiv_trans ?_ (CReal.Pre.equiv_symm (toPre_addC_equiv (AQ := AQ) x₂ y₂))
-  exact CReal.add_respects_equiv (x₁ := x₁.toPre) (x₂ := x₂.toPre) (y₁ := y₁.toPre) (y₂ := y₂.toPre) hx hy
+  exact CReal.add_respects_equiv (x₁ := x₁.toPre) (x₂ := x₂.toPre) (y₁ := y₁.toPre) (y₂ := y₂.toPre)
+    hx hy
 
 theorem mulC_respects_equiv {x₁ x₂ y₁ y₂ : CRealRep AQ} (hx : x₁ ≈ᵣ x₂) (hy : y₁ ≈ᵣ y₂) :
     CRealRep.mulC x₁ y₁ ≈ᵣ CRealRep.mulC x₂ y₂ := by
   refine CReal.Pre.equiv_trans (toPre_mulC_equiv (AQ := AQ) x₁ y₁) ?_
   refine CReal.Pre.equiv_trans ?_ (CReal.Pre.equiv_symm (toPre_mulC_equiv (AQ := AQ) x₂ y₂))
-  exact CReal.mul_respects_equiv (x₁ := x₁.toPre) (x₂ := x₂.toPre) (y₁ := y₁.toPre) (y₂ := y₂.toPre) hx hy
+  exact CReal.mul_respects_equiv (x₁ := x₁.toPre) (x₂ := x₂.toPre) (y₁ := y₁.toPre) (y₂ := y₂.toPre)
+    hx hy
 
 theorem subC_respects_equiv {x₁ x₂ y₁ y₂ : CRealRep AQ} (hx : x₁ ≈ᵣ x₂) (hy : y₁ ≈ᵣ y₂) :
     CRealRep.subC x₁ y₁ ≈ᵣ CRealRep.subC x₂ y₂ := by
@@ -694,7 +724,8 @@ theorem denote_one : denote (AQ := AQ) (CRealRep.one (AQ := AQ)) = (1 : CReal) :
   refine Quotient.sound ?_
   exact toPre_one_equiv (AQ := AQ)
 
-theorem denote_neg (x : CRealRep AQ) : denote (AQ := AQ) (CRealRep.neg x) = - denote (AQ := AQ) x := by
+theorem denote_neg (x : CRealRep AQ) : denote (AQ := AQ) (CRealRep.neg x) = - denote (AQ := AQ) x :=
+  by
   refine Quotient.sound ?_
   exact toPre_neg_equiv (AQ := AQ) x
 
@@ -708,7 +739,8 @@ theorem denote_mul (x y : CRealRep AQ) :
   refine Quotient.sound ?_
   exact toPre_mul_equiv (AQ := AQ) x y
 
-theorem denote_compress (x : CRealRep AQ) : denote (AQ := AQ) (CRealRep.compress x) = denote (AQ := AQ) x := by
+theorem denote_compress (x : CRealRep AQ) : denote (AQ := AQ) (CRealRep.compress x) = denote (AQ :=
+  AQ) x := by
   refine Quotient.sound ?_
   exact toPre_compress_equiv (AQ := AQ) x
 

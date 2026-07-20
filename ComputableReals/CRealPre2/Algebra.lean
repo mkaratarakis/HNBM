@@ -44,7 +44,8 @@ protected def Pre.add (x y : CReal.Pre) : CReal.Pre where
     have h_le_succ : n + 1 ≤ m + 1 := Nat.succ_le_succ h_le
     calc
       |(x.approx (n + 1) + y.approx (n + 1)) - (x.approx (m + 1) + y.approx (m + 1))|
-        = |(x.approx (n + 1) - x.approx (m + 1)) + (y.approx (n + 1) - y.approx (m + 1))| := by ring_nf
+        = |(x.approx (n + 1) - x.approx (m + 1)) + (y.approx (n + 1) - y.approx (m + 1))| := by
+          ring_nf
       _ ≤ |x.approx (n + 1) - x.approx (m + 1)| + |y.approx (n + 1) - y.approx (m + 1)| :=
           abs_add_le (x.approx (n + 1) - x.approx (m + 1)) (y.approx (n + 1) - y.approx (m + 1))
       _ ≤ (1 : ℚ) / 2 ^ (n + 1) + (1 : ℚ) / 2 ^ (n + 1) := by
@@ -53,12 +54,14 @@ protected def Pre.add (x y : CReal.Pre) : CReal.Pre where
         · exact y.is_regular (n + 1) (m + 1) h_le_succ
       _ = (1 : ℚ) / 2 ^ n := by field_simp [pow_succ]; ring
 
-theorem add_respects_equiv {x₁ x₂ y₁ y₂ : CReal.Pre} (h_x : CReal.Pre.Equiv x₁ x₂) (h_y : CReal.Pre.Equiv y₁ y₂) :
+theorem add_respects_equiv {x₁ x₂ y₁ y₂ : CReal.Pre} (h_x : CReal.Pre.Equiv x₁ x₂) (h_y :
+  CReal.Pre.Equiv y₁ y₂) :
     CReal.Pre.Equiv (CReal.Pre.add x₁ y₁) (CReal.Pre.add x₂ y₂) := by
   intro n
   dsimp [CReal.Pre.add, CReal.Pre.Equiv]
   calc
-    _ = |(x₁.approx (n + 2) - x₂.approx (n + 2)) + (y₁.approx (n + 2) - y₂.approx (n + 2))| := by ring_nf
+    _ = |(x₁.approx (n + 2) - x₂.approx (n + 2)) + (y₁.approx (n + 2) - y₂.approx (n + 2))| := by
+      ring_nf
     _ ≤ |x₁.approx (n + 2) - x₂.approx (n + 2)| + |y₁.approx (n + 2) - y₂.approx (n + 2)| :=
       abs_add_le (x₁.approx (n + 2) - x₂.approx (n + 2)) (y₁.approx (n + 2) - y₂.approx (n + 2))
     _ ≤ (1 : ℚ) / 2 ^ (n + 1) + (1 : ℚ) / 2 ^ (n + 1) := by
@@ -85,8 +88,10 @@ lemma le_pow_log_succ (B : ℕ) (_ : 0 < B) :
 /-- `2^a + 2^b ≤ 2^(max a b + 1)`. -/
 lemma two_pow_add_le_pow_max_add_one (a b : ℕ) :
     (2 : ℚ) ^ a + 2 ^ b ≤ 2 ^ (max a b + 1) := by
-  have h_max : (2:ℚ)^a ≤ (2:ℚ)^(max a b) := (pow_le_pow_iff_right₀ (by norm_num)).mpr (le_max_left a b)
-  have h_max' : (2:ℚ)^b ≤ (2:ℚ)^(max a b) := (pow_le_pow_iff_right₀ (by norm_num)).mpr (le_max_right a b)
+  have h_max : (2:ℚ)^a ≤ (2:ℚ)^(max a b) := (pow_le_pow_iff_right₀ (by norm_num)).mpr (le_max_left a
+    b)
+  have h_max' : (2:ℚ)^b ≤ (2:ℚ)^(max a b) := (pow_le_pow_iff_right₀ (by norm_num)).mpr (le_max_right
+    a b)
   calc
     _ ≤ (2:ℚ)^(max a b) + (2:ℚ)^(max a b) := add_le_add h_max h_max'
     _ = 2 ^ (max a b + 1) := by rw [pow_succ, ← two_mul]; exact Rat.mul_comm 2 (2 ^ max a b)
@@ -169,7 +174,8 @@ protected def Pre.mul (x y : CReal.Pre) : CReal.Pre where
     let kₙ := n + S; let kₘ := m + S
     have hknm : kₙ ≤ kₘ := Nat.add_le_add_right hnm S
     let Bx := x.cBound; let By := y.cBound
-    have h_core := product_diff_bound x y hknm (Bx:ℚ) (By:ℚ) (x.abs_approx_le_cBound kₙ) (y.abs_approx_le_cBound kₘ)
+    have h_core := product_diff_bound x y hknm (Bx:ℚ) (By:ℚ) (x.abs_approx_le_cBound kₙ)
+      (y.abs_approx_le_cBound kₘ)
     have h_S := x.sum_cBound_le_pow_mulShift y
     calc
       _ ≤ (Bx + By : ℚ) * (1 / 2 ^ kₙ) := h_core
@@ -272,7 +278,8 @@ lemma div_lt_iff {a b c : ℚ} (hb : 0 < b) : a / b < c ↔ a < c * b := by
   rw [← mul_lt_mul_iff_left₀ hb]
   field_simp [hb.ne']
 
-lemma div_le_div_of_le_of_nonneg {a _ c d : ℚ} (ha : 0 ≤ a) (hc : 0 < c) (_ : 0 < d) (h_le : c ≤ d) :
+lemma div_le_div_of_le_of_nonneg {a _ c d : ℚ} (ha : 0 ≤ a) (hc : 0 < c) (_ : 0 < d) (h_le : c ≤ d)
+  :
     a / d ≤ a / c := by
   gcongr
 
@@ -387,10 +394,13 @@ lemma mul_approx_bound_min
   have hyB : |y.approx ks| ≤ y.cBound := y.abs_approx_le_cBound ks
   calc
     |x.approx ks * y.approx ks - x.approx kb * y.approx kb|
-      = |(x.approx ks - x.approx kb) * y.approx ks + x.approx kb * (y.approx ks - y.approx kb)| := by ring_nf
+      = |(x.approx ks - x.approx kb) * y.approx ks + x.approx kb * (y.approx ks - y.approx kb)| :=
+        by ring_nf
     _ ≤ |(x.approx ks - x.approx kb) * y.approx ks| + |x.approx kb * (y.approx ks - y.approx kb)| :=
-      abs_add_le ((x.approx ks - x.approx kb) * y.approx ks) (x.approx kb * (y.approx ks - y.approx kb))
-    _ = |x.approx ks - x.approx kb| * |y.approx ks| + |x.approx kb| * |y.approx ks - y.approx kb| := by simp [abs_mul]
+      abs_add_le ((x.approx ks - x.approx kb) * y.approx ks) (x.approx kb * (y.approx ks - y.approx
+        kb))
+    _ = |x.approx ks - x.approx kb| * |y.approx ks| + |x.approx kb| * |y.approx ks - y.approx kb| :=
+      by simp [abs_mul]
     _ ≤ (1 / 2 ^ (min ks kb)) * |y.approx ks| + |x.approx kb| * (1 / 2 ^ (min ks kb)) := by
         gcongr
     _ ≤ (1 / 2 ^ (min ks kb)) * y.cBound + x.cBound * (1 / 2 ^ (min ks kb)) := by
@@ -783,7 +793,8 @@ theorem one_mul_pre (x : CReal.Pre) : CReal.Pre.Equiv (CReal.Pre.one.mul x) x :=
 open Rat
 
 /--
-**Ternary Product Estimate**. Bounds the difference between two ternary products at different indices.
+**Ternary Product Estimate**. Bounds the difference between two ternary products at different
+indices.
 |aₙbₙcₙ - aₘbₘcₘ| ≤ (Ba*Bc + Bb*Bc + Ba*Bb) * (1 / 2 ^ n) for n ≤ m.
 -/
 lemma ternary_product_diff_bound
@@ -791,7 +802,8 @@ lemma ternary_product_diff_bound
     |a.approx kₙ * b.approx kₙ * c.approx kₙ - a.approx kₘ * b.approx kₘ * c.approx kₘ| ≤
       (a.cBound*c.cBound + b.cBound*c.cBound + a.cBound*b.cBound : ℚ) * (1 / 2 ^ kₙ) := by
   let Ba : ℚ := a.cBound; let Bb : ℚ := b.cBound; let Bc : ℚ := c.cBound
-  have h_ab_diff : |a.approx kₙ * b.approx kₙ - a.approx kₘ * b.approx kₘ| ≤ (Ba + Bb) * (1 / 2 ^ kₙ) :=
+  have h_ab_diff : |a.approx kₙ * b.approx kₙ - a.approx kₘ * b.approx kₘ| ≤ (Ba + Bb) * (1 / 2 ^
+    kₙ) :=
     product_diff_bound a b h_le Ba Bb (a.abs_approx_le_cBound kₙ) (b.abs_approx_le_cBound kₘ)
   have h_creg : |c.approx kₙ - c.approx kₘ| ≤ (1 : ℚ) / 2 ^ kₙ := c.is_regular kₙ kₘ h_le
   calc
@@ -862,7 +874,8 @@ lemma mul_assoc_bound (a b c : CReal.Pre) (k : ℕ) :
       let Sab := a.mulShift b; let K_ab := K1 + Sab
       have h_le : K1 ≤ K_ab := Nat.le_add_right _ _
       rw [abs_sub_comm]
-      have h_core := product_diff_bound a b h_le Ba Bb (a.abs_approx_le_cBound K1) (b.abs_approx_le_cBound K_ab)
+      have h_core := product_diff_bound a b h_le Ba Bb (a.abs_approx_le_cBound K1)
+        (b.abs_approx_le_cBound K_ab)
       exact (le_trans h_core (by simp only [one_div]; exact Rat.le_refl))
     calc
       |(a.mul b).approx K1 * c.approx K1 - a.approx K1 * b.approx K1 * c.approx K1|
@@ -897,7 +910,8 @@ lemma mul_assoc_bound (a b c : CReal.Pre) (k : ℕ) :
     have h_rw :
       a.approx K2 * (b.approx (K2 + Sbc) * c.approx (K2 + Sbc)) -
         a.approx K2 * (b.approx K2 * c.approx K2)
-        = a.approx K2 * ((b.approx (K2 + Sbc) * c.approx (K2 + Sbc)) - (b.approx K2 * c.approx K2)) := by
+        = a.approx K2 * ((b.approx (K2 + Sbc) * c.approx (K2 + Sbc)) - (b.approx K2 * c.approx K2))
+          := by
       ring_nf
     have h_bc_core :
       |(b.approx (K2 + Sbc) * c.approx (K2 + Sbc)) - (b.approx K2 * c.approx K2)| ≤
@@ -925,7 +939,8 @@ lemma mul_assoc_bound (a b c : CReal.Pre) (k : ℕ) :
       simpa [div_eq_mul_inv, mul_comm, mul_left_comm, mul_assoc] using h_bound
     calc
       |P2.approx k - a.approx K2 * b.approx K2 * c.approx K2|
-          = |a.approx (k + S2) * (b.mul c).approx (k + S2) - a.approx K2 * b.approx K2 * c.approx K2| := by
+          = |a.approx (k + S2) * (b.mul c).approx (k + S2) - a.approx K2 * b.approx K2 * c.approx
+            K2| := by
               rfl
       _ = |a.approx K2 * (b.approx (K2 + Sbc) * c.approx (K2 + Sbc))
               - a.approx K2 * (b.approx K2 * c.approx K2)| := h_goal_form
@@ -939,13 +954,15 @@ lemma mul_assoc_bound (a b c : CReal.Pre) (k : ℕ) :
         rw [min_eq_left h_le]
         have h_core := ternary_product_diff_bound a b c h_le
         exact (le_trans h_core (by
-          simp_all only [add_le_add_iff_left, one_div, P1, K1, S1, Bc, Ba, Bb, P2, K2, S2, B_ternary]
+          simp_all only [add_le_add_iff_left, one_div, P1, K1, S1, Bc, Ba, Bb, P2, K2, S2,
+            B_ternary]
           rfl))
     | inr h_le =>
         rw [min_eq_right h_le, abs_sub_comm]
         have h_core := ternary_product_diff_bound a b c h_le
         exact (le_trans h_core (by
-          simp_all only [add_le_add_iff_left, one_div, P1, K1, S1, Bc, Ba, Bb, P2, K2, S2, B_ternary]
+          simp_all only [add_le_add_iff_left, one_div, P1, K1, S1, Bc, Ba, Bb, P2, K2, S2,
+            B_ternary]
           rfl))
   have h_K1_ge_k : k ≤ K1 := Nat.le_add_right k S1
   have h_K2_ge_k : k ≤ K2 := Nat.le_add_right k S2
@@ -978,7 +995,8 @@ lemma mul_assoc_bound (a b c : CReal.Pre) (k : ℕ) :
     _ ≤ Bc*(Ba+Bb)/2^K1 + B_ternary/2^(min K1 K2) + Ba*(Bb+Bc)/2^K2 := by
       have := abs_sub_comm (a.approx K2 * b.approx K2 * c.approx K2) (P2.approx k)
       gcongr
-      simp_all only [Nat.add_min_add_left, le_add_iff_nonneg_right, zero_le, le_inf_iff, and_self, P1, K1, S1, Bc, Ba,
+      simp_all only [Nat.add_min_add_left, le_add_iff_nonneg_right, zero_le, le_inf_iff, and_self,
+        P1, K1, S1, Bc, Ba,
         Bb, P2, K2, S2, B_ternary]
     _ ≤ Bc*(Ba+Bb)/2^k + B_ternary/2^k + Ba*(Bb+Bc)/2^k := by
       gcongr
@@ -1040,7 +1058,8 @@ theorem mul_assoc_pre (a b c : CReal.Pre) :
     rw [abs_sub_comm]; exact P2.is_regular (n+1) m_idx h_n_le_midx
   calc
     |P1.approx (n+1) - P2.approx (n+1)|
-      ≤ |P1.approx (n+1) - P1.approx m_idx| + |P1.approx m_idx - P2.approx m_idx| + |P2.approx m_idx - P2.approx (n+1)| := by
+      ≤ |P1.approx (n+1) - P1.approx m_idx| + |P1.approx m_idx - P2.approx m_idx| + |P2.approx m_idx
+        - P2.approx (n+1)| := by
         have h_eq :
           P1.approx (n + 1) - P2.approx (n + 1)
             = (P1.approx (n + 1) - P1.approx m_idx)
@@ -1051,7 +1070,8 @@ theorem mul_assoc_pre (a b c : CReal.Pre) :
           (P1.approx (n + 1) - P1.approx m_idx)
           (P1.approx m_idx - P2.approx m_idx)
           (P2.approx m_idx - P2.approx (n + 1))
-        simp_all only [le_sup_left, le_sup_right, one_div, sub_add_sub_cancel, B_target, Bc, Ba, Bb, m_idx, P1, P2]
+        simp_all only [le_sup_left, le_sup_right, one_div, sub_add_sub_cancel, B_target, Bc, Ba, Bb,
+          m_idx, P1, P2]
     _ ≤ 1/2^(n+1) + ε + 1/2^(n+1) := by
         gcongr
     _ = 1/2^n + ε := by

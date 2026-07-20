@@ -93,7 +93,8 @@ theorem le_of_toReal_le {x y : CReal.Pre} (h : Pre.toReal x ≤ Pre.toReal y) : 
   exact (Rat.cast_le (K := ℝ)).1 hxy'
 
 /--
-Monotonicity at the pre-level: if `x ≤ y` in the computable order, then `toReal x ≤ toReal y` in `ℝ`.
+Monotonicity at the pre-level: if `x ≤ y` in the computable order, then `toReal x ≤ toReal y` in
+  `ℝ`.
 -/
 theorem toReal_mono {x y : CReal.Pre} (hxy : Pre.le x y) : Pre.toReal x ≤ Pre.toReal y := by
   -- use `le_of_forall_pos_le_add` on `ℝ`

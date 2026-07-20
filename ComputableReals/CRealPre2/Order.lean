@@ -141,7 +141,8 @@ theorem le_well_defined
   · intro h; exact le_well_defined_forward hx hy h
   · intro h; exact le_well_defined_backward hx hy h
 
-instance : LE CReal := ⟨Quotient.lift₂ Pre.le (fun _ _ _ _ hx hy => propext (le_well_defined hx hy))⟩
+instance : LE CReal := ⟨Quotient.lift₂ Pre.le (fun _ _ _ _ hx hy => propext (le_well_defined hx
+  hy))⟩
 
 /-! ### Proving the Partial Order Axioms -/
 
@@ -583,13 +584,15 @@ theorem mul_nonneg (a b : CReal) (ha : 0 ≤ a) (hb : 0 ≤ b) : 0 ≤ a * b := 
     have h' : 0 ≤ a.approx K + (1 : ℚ) / 2 ^ (K - 1) := by
       simpa [add_comm] using haK_nonneg
     have hneg := (neg_le_iff_add_nonneg).2 h'
-    simp; ring_nf; simp_all only [add_pos_iff, zero_lt_one, or_true, true_or, Nat.succ_add_sub_one, one_div, inv_pow, K,
+    simp; ring_nf; simp_all only [add_pos_iff, zero_lt_one, or_true, true_or, Nat.succ_add_sub_one,
+      one_div, inv_pow, K,
       S]
   have hbK : -(1 : ℚ) / 2 ^ (K - 1) ≤ b.approx K := by
     have h' : 0 ≤ b.approx K + (1 : ℚ) / 2 ^ (K - 1) := by
       simpa [add_comm] using hbK_nonneg
     have hneg := (neg_le_iff_add_nonneg).2 h'
-    simp; ring_nf; simp_all only [add_pos_iff, zero_lt_one, or_true, true_or, Nat.succ_add_sub_one, one_div, inv_pow, K,
+    simp; ring_nf; simp_all only [add_pos_iff, zero_lt_one, or_true, true_or, Nat.succ_add_sub_one,
+      one_div, inv_pow, K,
       S]
   let Ba : ℚ := a.cBound
   let Bb : ℚ := b.cBound
@@ -673,7 +676,8 @@ theorem mul_nonneg (a b : CReal) (ha : 0 ≤ a) (hb : 0 ≤ b) : 0 ≤ a * b := 
 /-! ### Strict Positivity and Final Instance -/
 
 /-- Strict positivity (0 < x) on CReal. Lifted from CReal.Pre.Pos. -/
-def Pos (x : CReal) : Prop := Quotient.lift Pre.Pos (fun _ _ h => propext (CReal.Pre.pos_well_defined _ _ h)) x
+def Pos (x : CReal) : Prop := Quotient.lift Pre.Pos (fun _ _ h => propext
+  (CReal.Pre.pos_well_defined _ _ h)) x
 
 /-- Pre-level: from Pos (y − x) derive x ≤ y. -/
 private lemma pre_pos_sub_implies_le
@@ -710,7 +714,8 @@ private lemma pre_pos_sub_implies_le
       have h_neg_x : -x.approx K ≥ -(x.approx (N + 2) + 1 / 2 ^ (N + 2)) := by
         exact neg_le_neg xK_le
       have := add_le_add yK_ge h_neg_x
-      have h_rhs_rewrite : (y.approx (N + 2) - 1 / 2 ^ (N + 2)) + -(x.approx (N + 2) + 1 / 2 ^ (N + 2)) =
+      have h_rhs_rewrite : (y.approx (N + 2) - 1 / 2 ^ (N + 2)) + -(x.approx (N + 2) + 1 / 2 ^ (N +
+        2)) =
                            (y.approx (N + 2) - x.approx (N + 2)) - (2 / 2 ^ (N + 2)) := by ring
       rw [h_rhs_rewrite] at this
       linarith [this]
@@ -721,7 +726,8 @@ private lemma pre_pos_sub_implies_le
       have : (y.approx (N + 2) - x.approx (N + 2)) - 1 / 2 ^ (N + 1)
                > 1 / 2 ^ N - 1 / 2 ^ (N + 1) := by
         linarith [h_gap_at_N2]
-      simp_all only [one_div, Nat.add_max_add_right, add_le_add_iff_right, le_sup_left, Nat.reduceLeDiff, le_sup_right,
+      simp_all only [one_div, Nat.add_max_add_right, add_le_add_iff_right, le_sup_left,
+        Nat.reduceLeDiff, le_sup_right,
         ge_iff_le, tsub_le_iff_right, gt_iff_lt, K]
     exact lt_of_lt_of_le h_target h_lower_bound
   have hx_tail : x.approx (n + 1) ≤ x.approx K + 1 / 2 ^ (n + 1) := by
@@ -918,7 +924,8 @@ theorem mul_pos (a b : CReal) (ha : 0 < a) (hb : 0 < b) : 0 < a * b := by
           > (1 / 2 ^ (Na + 1)) * (1 / 2 ^ (Nb + 1)) := by
               exact mul_lt_mul' (le_of_lt h_a_stable) h_b_stable h_nonneg_b h_pos_xa_K
       _ = 1 / 2 ^ (Na + Nb + 2) := by
-              have : (1 : ℚ) / 2 ^ (Na + 1) * (1 / 2 ^ (Nb + 1)) = 1 / (2 ^ (Na + 1) * 2 ^ (Nb + 1)) := by
+              have : (1 : ℚ) / 2 ^ (Na + 1) * (1 / 2 ^ (Nb + 1)) = 1 / (2 ^ (Na + 1) * 2 ^ (Nb + 1))
+                := by
                 field_simp
               rw [this]
               congr 1
@@ -1087,7 +1094,8 @@ lemma pos_uniform_lower_bound (y : CReal.Pre) (hy : CReal.Pre.Pos y) :
   have h_delta_lt : δ < y.approx K - 1 / 2 ^ K := by
     have haux : (1 / 2 ^ (N + 1) - 1 / 2 ^ K) < (y.approx K - 1 / 2 ^ K) :=
       sub_lt_sub_right yK_gt_half_succ (1 / 2 ^ K)
-    simp_all only [one_div, inv_pos, Nat.ofNat_pos, pow_succ_pos, add_le_add_iff_left, Nat.one_le_ofNat, ge_iff_le,
+    simp_all only [one_div, inv_pos, Nat.ofNat_pos, pow_succ_pos, add_le_add_iff_left,
+      Nat.one_le_ofNat, ge_iff_le,
       tsub_le_iff_right, gt_iff_lt, δ, K]
   have hK_sub_le : y.approx K - 1 / 2 ^ K ≤ y.approx m := by
     linarith [ym_ge]
@@ -1120,7 +1128,9 @@ lemma nat_ceil_succ_mul_lower {B δ : ℚ} (hδ : 0 < δ) :
     B ≤ ((Nat.ceil (B / δ) + 1 : ℕ) : ℚ) * δ := by
   have base := nat_ceil_mul_lower (B := B) (δ := δ) hδ
   have add_step : (Nat.ceil (B / δ) : ℚ) * δ ≤ ((Nat.ceil (B / δ) : ℕ) + 1 : ℕ) * δ := by
-    have : (Nat.ceil (B / δ) : ℚ) ≤ ((Nat.ceil (B / δ) : ℕ) + 1 : ℕ) := by norm_cast; exact Nat.le_succ _
+    have : (Nat.ceil (B / δ) : ℚ) ≤ ((Nat.ceil (B / δ) : ℕ) + 1 : ℕ) := by
+      norm_cast
+      exact Nat.le_succ _
     exact mul_le_mul_of_nonneg_right this (le_of_lt hδ)
   exact base.trans add_step
 

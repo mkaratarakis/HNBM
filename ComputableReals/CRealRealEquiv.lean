@@ -300,7 +300,8 @@ theorem idx_spec (f : CauSeq ℚ absℚ) (n : ℕ) :
     have hpow : (0 : ℚ) < (2 : ℚ) ^ n := pow_pos (by norm_num) n
     exact one_div_pos.mpr hpow)))
 
-/-- Monotone index sequence built from `idx` (so later approximants are taken further in the tail). -/
+/-- Monotone index sequence built from `idx` (so later approximants are taken further in the tail).
+-/
 noncomputable def idxMono (f : CauSeq ℚ absℚ) : ℕ → ℕ
   | 0 => idx f 0
   | n + 1 => max (idxMono f n) (idx f (n + 1))

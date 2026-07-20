@@ -129,7 +129,8 @@ def inv (x : CReal.Pre) (W : InvWitness x) : CReal.Pre where
         dsimp [Kn]; rw [pow_add]; field_simp [pow_ne_zero]
 
 /-- Helper lemma for stability using the maximum witness. -/
-lemma stability_at_max_witness (x : CReal.Pre) (W1 W2 : InvWitness x) (Nmax : ℕ) (hNmax : Nmax = max W1.N W2.N) (K : ℕ) (hK : Nmax+1 ≤ K) :
+lemma stability_at_max_witness (x : CReal.Pre) (W1 W2 : InvWitness x) (Nmax : ℕ) (hNmax : Nmax = max
+  W1.N W2.N) (K : ℕ) (hK : Nmax+1 ≤ K) :
     1/2^(Nmax+1) < |x.approx K| := by
   cases le_total W1.N W2.N with
   | inl h_le => rw [hNmax, max_eq_right h_le] at hK ⊢; exact x.inv_witness_stability W2 K hK
@@ -203,7 +204,8 @@ theorem inv_witness_irrelevant (x : CReal.Pre) (W1 W2 : InvWitness x) :
         (1 : ℚ) / 2 ^ (2 * Nmax + 2) ≤ (1 : ℚ) / 2 ^ (N1 + N2 + 2) := by
       exact one_div_pow_le_one_div_pow_of_le rfl h_exp_le
     have h_right_aux : (1 : ℚ) / 2 ^ (N1 + N2 + 2) < |x.approx K1'| * |x.approx K2'| := by
-      simp_all only [div_pos_iff_of_pos_left, Nat.ofNat_pos, le_sup_left, le_sup_right, add_le_add_iff_right, one_div,
+      simp_all only [div_pos_iff_of_pos_left, Nat.ofNat_pos, le_sup_left, le_sup_right,
+        add_le_add_iff_right, one_div,
         D, Nmax, N1, N2, Nmin, K, K1', K2']
     have h_right : (1 : ℚ) / 2 ^ (N1 + N2 + 2) < |x.approx K1' * x.approx K2'| := by
       simpa [abs_mul] using h_right_aux
@@ -235,7 +237,8 @@ theorem inv_witness_irrelevant (x : CReal.Pre) (W1 W2 : InvWitness x) :
       _ ≤ (1 / 2 ^ (min K1' K2')) / (1 / 2 ^ (2 * Nmax + 2)) := by
         have ha : 0 ≤ (1 : ℚ) / 2 ^ (min K1' K2') := by positivity
         have hc : 0 < (1 : ℚ) / 2 ^ (2 * Nmax + 2) := by positivity
-        have h_le : (1 : ℚ) / 2 ^ (2 * Nmax + 2) ≤ |x.approx K1' * x.approx K2'| := le_of_lt h_denom'
+        have h_le : (1 : ℚ) / 2 ^ (2 * Nmax + 2) ≤ |x.approx K1' * x.approx K2'| := le_of_lt
+          h_denom'
         exact CReal.div_le_div_of_le_left (a := (1 : ℚ) / 2 ^ (min K1' K2')) ha hc h_le
     have h_bound_simplified :
         (1 / 2 ^ (min K1' K2')) / (1 / 2 ^ (2 * Nmax + 2)) = (2 ^ D : ℚ) / 2 ^ K := by
@@ -355,7 +358,8 @@ lemma separated_of_equiv_left
     have hK_ge : Wx.N + 1 ≤ K := by
       dsimp [K]
       have : N + 1 ≤ N + 3 := Nat.add_le_add_left (by decide : 1 ≤ 3) N
-      simp_all only [lt_add_iff_pos_left, add_pos_iff, Nat.ofNat_pos, or_true, add_le_add_iff_left, Nat.one_le_ofNat, K,
+      simp_all only [lt_add_iff_pos_left, add_pos_iff, Nat.ofNat_pos, or_true, add_le_add_iff_left,
+        Nat.one_le_ofNat, K,
         Wx]
     exact inv_witness_stability x Wx K hK_ge
   have hyK_lower : |y.approx K| ≥ |x.approx K| - (1 : ℚ) / 2 ^ (K - 1) :=
@@ -366,7 +370,8 @@ lemma separated_of_equiv_left
     simp [K]
   have : (1 : ℚ) / 2 ^ (N + 2) < |x.approx K| - 1 / 2 ^ (N + 2) := by
     have hstep := sub_lt_sub_right hxK ((1 : ℚ) / 2 ^ (N + 2))
-    simp_all only [lt_add_iff_pos_left, add_pos_iff, Nat.ofNat_pos, or_true, one_div, Nat.add_one_sub_one, ge_iff_le,
+    simp_all only [lt_add_iff_pos_left, add_pos_iff, Nat.ofNat_pos, or_true, one_div,
+      Nat.add_one_sub_one, ge_iff_le,
       tsub_le_iff_right, K]
   have hyK : (1 : ℚ) / 2 ^ (N + 2) < |y.approx K| := by
     have hyK' : |x.approx K| - (1 : ℚ) / 2 ^ (N + 2) ≤ |y.approx K| := by
@@ -388,7 +393,8 @@ theorem separated_well_defined (x y : CReal.Pre) (hxy : CReal.Pre.Equiv x y) :
   · exact CReal.Pre.separated_of_equiv_right hxy
 
 /-- Helper to construct a witness for y based on a witness for x, assuming x ≈ y. -/
-def transfer_witness (x y : CReal.Pre) (hxy : CReal.Pre.Equiv x y) (Wx : InvWitness x) : InvWitness y :=
+def transfer_witness (x y : CReal.Pre) (hxy : CReal.Pre.Equiv x y) (Wx : InvWitness x) : InvWitness
+  y :=
   let N := Wx.N
   let M := N + 2
   let K := N + 3
@@ -405,7 +411,8 @@ def transfer_witness (x y : CReal.Pre) (hxy : CReal.Pre.Equiv x y) (Wx : InvWitn
     simpa using CReal.two_halves_to_succ_sub N
   have h_strict : (1 : ℚ) / 2 ^ (N + 2) < |x.approx K| - 1 / 2 ^ (N + 2) := by
     have := sub_lt_sub_right h_xK ((1 : ℚ) / 2 ^ (N + 2))
-    simp_all only [add_le_add_iff_left, Nat.one_le_ofNat, one_div, lt_add_iff_pos_left, add_pos_iff, Nat.ofNat_pos,
+    simp_all only [add_le_add_iff_left, Nat.one_le_ofNat, one_div, lt_add_iff_pos_left, add_pos_iff,
+      Nat.ofNat_pos,
       or_true, Nat.add_one_sub_one, ge_iff_le, tsub_le_iff_right, K, N]
   have h_mono : |x.approx K| - (1 : ℚ) / 2 ^ (N + 2) ≤ |y.approx K| := by
     simpa [hKpred] using hyK_lower
@@ -576,7 +583,8 @@ theorem inv_respects_equiv
     have h_term1' : |(x.approx Kx)⁻¹ - (x.approx Ky)⁻¹| ≤ (1 : ℚ) / 2 ^ k := by
       have hmin : min Kx Ky = Kx := min_eq_left hKx_le_Ky
       have hLL : L * L = (1 : ℚ) / 2 ^ (2 * Nx + 2) := by
-        simpa [L, two_mul, pow_add, Nat.add_comm, Nat.add_left_comm, Nat.add_assoc, div_eq_mul_inv] using
+        simpa [L, two_mul, pow_add, Nat.add_comm, Nat.add_left_comm, Nat.add_assoc, div_eq_mul_inv]
+          using
           CReal.Pre.one_div_pow_mul_one_div_pow (Nx + 1) (Nx + 1)
       have hcore :
           |(x.approx Kx)⁻¹ - (x.approx Ky)⁻¹|
@@ -587,7 +595,8 @@ theorem inv_respects_equiv
       have hsimps :
           ((1 : ℚ) / 2 ^ Kx) / ((1 : ℚ) / 2 ^ (2 * Nx + 2)) = (1 : ℚ) / 2 ^ k := by
         simpa [hKx] using CReal.Pre.div_one_div_pow_simp k (2 * Nx + 2)
-      simp_all only [add_le_add_iff_left, add_le_add_iff_right, Nat.ofNat_pos, mul_le_mul_iff_right₀,
+      simp_all only [add_le_add_iff_left, add_le_add_iff_right, Nat.ofNat_pos,
+        mul_le_mul_iff_right₀,
         le_add_iff_nonneg_right, zero_le, one_div, inf_of_le_left, div_inv_eq_mul, ge_iff_le,
         W'y, Kx, k, Sx, Nx, Ky, Sy, L, Ly]
     have hKpos : 0 < Ky := by dsimp [Ky]; exact Nat.succ_pos _
@@ -598,7 +607,8 @@ theorem inv_respects_equiv
         (hLx := hL_Ky_x) (hLy := hLy_Ky)
     have h_term2' : |(x.approx Ky)⁻¹ - (y.approx Ky)⁻¹| ≤ (1 : ℚ) / 2 ^ (n + 2) := by
       have hden : L * Ly = (1 : ℚ) / 2 ^ (2 * Nx + 4) := by
-        simpa [L, Ly, two_mul, pow_add, Nat.add_comm, Nat.add_left_comm, Nat.add_assoc, div_eq_mul_inv] using
+        simpa [L, Ly, two_mul, pow_add, Nat.add_comm, Nat.add_left_comm, Nat.add_assoc,
+          div_eq_mul_inv] using
           CReal.Pre.one_div_pow_mul_one_div_pow (Nx + 1) (Nx + 3)
       have hKy_eq : Ky = k + (2 * Nx + 6) := by
         dsimp [Ky, Sy, k]; simp [two_mul, Nat.add_assoc, Nat.add_comm, Nat.add_left_comm]
@@ -613,9 +623,12 @@ theorem inv_respects_equiv
         simpa [this, hden] using CReal.Pre.div_one_div_pow_simp (k + 1) (2 * Nx + 4)
       have hk : k + 1 = n + 2 := by simp [k]
       have : |(x.approx Ky)⁻¹ - (y.approx Ky)⁻¹| ≤ (1 : ℚ) / 2 ^ (k + 1) := by
-        simp_all only [add_le_add_iff_left, add_le_add_iff_right, Nat.ofNat_pos, mul_le_mul_iff_right₀,
-          le_add_iff_nonneg_right, zero_le, one_div, inf_of_le_left, add_pos_iff, _root_.zero_lt_one, or_true,
-          mul_pos_iff_of_pos_left, or_self, Nat.add_succ_sub_one, Nat.add_left_cancel_iff, Nat.add_right_cancel_iff,
+        simp_all only [add_le_add_iff_left, add_le_add_iff_right, Nat.ofNat_pos,
+          mul_le_mul_iff_right₀,
+          le_add_iff_nonneg_right, zero_le, one_div, inf_of_le_left, add_pos_iff,
+            _root_.zero_lt_one, or_true,
+          mul_pos_iff_of_pos_left, or_self, Nat.add_succ_sub_one, Nat.add_left_cancel_iff,
+            Nat.add_right_cancel_iff,
           div_inv_eq_mul, W'y, Kx, k, Sx, Nx, Ky, Sy, L, Ly]
       simpa [hk] using this
     have := calc
@@ -738,7 +751,8 @@ theorem mul_inv_cancel (x : CReal.Pre) (W : CReal.Pre.InvWitness x) :
         (1 : ℚ) / 2 ^ (n + 1 + S_mul) ≤ (1 : ℚ) / 2 ^ (n + 1) := by
       exact one_div_pow_le_one_div_pow_of_le rfl (Nat.le_add_right _ _)
     have h_main' : |prod.approx M - 1| ≤ (1 : ℚ) / 2 ^ (n + 1 + S_mul) := by
-      simp_all only [lt_add_iff_pos_left, add_pos_iff, Nat.ofNat_pos, or_true, one_div, abs_pos, ne_eq,
+      simp_all only [lt_add_iff_pos_left, add_pos_iff, Nat.ofNat_pos, or_true, one_div, abs_pos,
+        ne_eq,
         not_false_eq_true, div_inv_eq_mul, M, N, K_final, K, S_mul, inv_x, S_inv, L, prod]
     exact h_main'.trans h_mono
   dsimp [CReal.Pre.Equiv, CReal.Pre.one]
@@ -781,7 +795,8 @@ structure RCauSeq' where
       seq n ≤ seq m + (((1 : ℚ) / ((2 : ℚ) ^ n)) : CReal) ∧
       seq m ≤ seq n + (((1 : ℚ) / ((2 : ℚ) ^ n)) : CReal)
 
-/-- A Cauchy sequence of computable real numbers with dyadic modulus, together with explicit representatives. -/
+/-- A Cauchy sequence of computable real numbers with dyadic modulus, together with explicit
+representatives. -/
 structure RCauSeq where
   seq : ℕ → CReal
   pre : ℕ → CReal.Pre
@@ -862,7 +877,8 @@ def Apart (x y : CReal) : Prop :=
           exact (Pre.pos_well_defined _ _ (add_respects_equiv hx (neg_respects_equiv _ _ hy))).mpr h
         | inr h =>
           right
-          exact (Pre.pos_well_defined _ _ (add_respects_equiv hy (neg_respects_equiv _ _ hx))).mpr h))
+          exact (Pre.pos_well_defined _ _ (add_respects_equiv hy (neg_respects_equiv _ _ hx))).mpr
+            h))
     x y
 
 -- Fixed lim_pre definition
@@ -909,7 +925,8 @@ lemma neg_zero_equiv_pre : CReal.Pre.Equiv (CReal.Pre.neg CReal.Pre.zero) CReal.
 
 /-- x is apart from 0 if and only if its underlying representation is Separated. -/
 theorem apart_zero_iff_separated (x : CReal) :
-  Apart x 0 ↔ Quotient.lift Pre.Separated (fun _ _ h => propext (Pre.separated_well_defined _ _ h)) x := by
+  Apart x 0 ↔ Quotient.lift Pre.Separated (fun _ _ h => propext (Pre.separated_well_defined _ _ h))
+    x := by
   refine Quot.induction_on x (fun x_pre => ?_)
   dsimp [Apart, Quotient.lift]
   constructor
@@ -930,7 +947,8 @@ theorem apart_zero_iff_separated (x : CReal) :
         left
         exact (Pre.pos_well_defined _ _ h_eq1).mp hpos
       | inr hpos =>
-        have h_eq2 : CReal.Pre.Equiv (CReal.Pre.zero.add (CReal.Pre.neg x_pre)) (CReal.Pre.neg x_pre) :=
+        have h_eq2 : CReal.Pre.Equiv (CReal.Pre.zero.add (CReal.Pre.neg x_pre)) (CReal.Pre.neg
+          x_pre) :=
           zero_add_pre (CReal.Pre.neg x_pre)
         right
         exact (Pre.pos_well_defined _ _ h_eq2).mp hpos
@@ -952,7 +970,8 @@ theorem apart_zero_iff_separated (x : CReal) :
           (add_zero_pre x_pre)
       exact Or.inl ((Pre.pos_well_defined _ _ h_eq1).mpr hx)
     | inr hnx =>
-      have h_eq2 : CReal.Pre.Equiv (CReal.Pre.zero.add (CReal.Pre.neg x_pre)) (CReal.Pre.neg x_pre) :=
+      have h_eq2 : CReal.Pre.Equiv (CReal.Pre.zero.add (CReal.Pre.neg x_pre)) (CReal.Pre.neg x_pre)
+        :=
         zero_add_pre (CReal.Pre.neg x_pre)
       exact Or.inr ((Pre.pos_well_defined _ _ h_eq2).mpr hnx)
 
@@ -1212,7 +1231,8 @@ theorem pseudo_order_property (x y z : CReal) (hxy : x < y) : x < z ∨ z < y :=
         simpa [Nat.add_assoc, Nat.add_left_comm, Nat.add_comm] using two_halves_to_succ (N + 1)
       have h_gap' : (1:ℚ)/2^(N+3) + (1:ℚ)/2^(N+3) < z_pre.approx K - x_pre.approx K := by
         rw [h_sum_halves]
-        simp_all only [one_div, lt_add_neg_iff_add_lt, tsub_le_iff_right, add_le_add_iff_right, le_add_iff_nonneg_right,
+        simp_all only [one_div, lt_add_neg_iff_add_lt, tsub_le_iff_right, add_le_add_iff_right,
+          le_add_iff_nonneg_right,
           zero_le, ge_iff_le, gt_iff_lt, sub_lt_sub_iff_right, K, M, m_K]
       have h_goal :
           (1:ℚ)/2^(N+3) < z_pre.approx K - x_pre.approx K - 1/2^(N+3) := by
@@ -1291,10 +1311,12 @@ lemma diff_at_sync_bound (s : RCauSeq) (n : ℕ) (hn : 2 ≤ n) :
     have h := s.is_cauchy (n - 2) (n + 2) hnm
     dsimp [B, C, Nat.sub_add_cancel hn, Nat.add_comm, Nat.add_left_comm, Nat.add_assoc,
            h_succ, Nat.succ_eq_add_one, Nat.one_add]
-    simp_all only [lim_pre_approx_simp, one_div, tsub_le_iff_right, tsub_pos_iff_lt, Nat.succ_eq_add_one,
+    simp_all only [lim_pre_approx_simp, one_div, tsub_le_iff_right, tsub_pos_iff_lt,
+      Nat.succ_eq_add_one,
       Nat.sub_add_cancel, A, B, C, L]
   have h3 : |C - L| ≤ (1 : ℚ) / 2 ^ n := by
-    simpa [C, L, lim_pre_approx_simp, abs_sub_comm, Nat.add_comm, Nat.add_left_comm, Nat.add_assoc] using
+    simpa [C, L, lim_pre_approx_simp, abs_sub_comm, Nat.add_comm, Nat.add_left_comm, Nat.add_assoc]
+      using
       (s.pre (n + 4)).is_regular n (n + 4) (Nat.le_add_right _ _)
   have h_bound : |A - L| ≤ 1/2^n + 1/2^(n-1) + 1/2^n := by
     calc
@@ -1398,7 +1420,8 @@ lemma lift_sync_bound_with_uniform_tail
     _ = r + (1 : ℚ) / 2 ^ j + (1 : ℚ) / 2 ^ (n + 1) := by ring
 
 lemma diff_sync_bound_for_d (s : CReal.RCauSeq) (n : ℕ) (hn : 2 ≤ n) :
-  |((CReal.Pre.add (s.pre n) (CReal.Pre.neg (CReal.lim_pre s))).approx (n + 1))| ≤ (1 : ℚ) / 2 ^ (n - 2) := by
+  |((CReal.Pre.add (s.pre n) (CReal.Pre.neg (CReal.lim_pre s))).approx (n + 1))| ≤ (1 : ℚ) / 2 ^ (n
+    - 2) := by
   let d := CReal.Pre.add (s.pre n) (CReal.Pre.neg (CReal.lim_pre s))
   have hJ :
     d.approx (n + 1)
@@ -1430,7 +1453,8 @@ lemma all_indices_bound_from_sync
   exact h_all_sync.trans h_stronger
 
 theorem converges_to_lim (s : CReal.RCauSeq) (k : ℕ) :
-    ∀ n ≥ k+2, |s.seq n - CReal.lim s| ≤ ((((1 : ℚ) / (2 : ℚ) ^ k) + ((1 : ℚ) / (2 : ℚ) ^ (n + 1))) : CReal) := by
+    ∀ n ≥ k+2, |s.seq n - CReal.lim s| ≤ ((((1 : ℚ) / (2 : ℚ) ^ k) + ((1 : ℚ) / (2 : ℚ) ^ (n + 1)))
+      : CReal) := by
   intro n hn
   have hseq : s.seq n = ⟦s.pre n⟧ := s.seq_spec' n
   have hlim : CReal.lim s = ⟦CReal.lim_pre s⟧ := rfl
@@ -1443,10 +1467,12 @@ theorem converges_to_lim (s : CReal.RCauSeq) (k : ℕ) :
     ∀ j, |d.approx (j + 1)| ≤ (1 : ℚ) / (2 : ℚ) ^ k + 1 / (2 : ℚ) ^ j + 1 / 2 ^ (n + 1) :=
     all_indices_bound_from_sync d n k hn2 h_sync hk_le
   have hall' :
-    ∀ j, |d.approx (j + 1)| ≤ ((1 : ℚ) / (2 : ℚ) ^ k + (1 : ℚ) / (2 : ℚ) ^ (n + 1)) + 1 / (2 : ℚ) ^ j := by
+    ∀ j, |d.approx (j + 1)| ≤ ((1 : ℚ) / (2 : ℚ) ^ k + (1 : ℚ) / (2 : ℚ) ^ (n + 1)) + 1 / (2 : ℚ) ^
+      j := by
     intro j
     simpa [add_comm, add_left_comm, add_assoc] using (hall_with_tail j)
-  have h_abs : |(⟦d⟧ : CReal)| ≤ ((((1 : ℚ) / (2 : ℚ) ^ k) + ((1 : ℚ) / (2 : ℚ) ^ (n + 1))) : CReal) :=
+  have h_abs : |(⟦d⟧ : CReal)| ≤ ((((1 : ℚ) / (2 : ℚ) ^ k) + ((1 : ℚ) / (2 : ℚ) ^ (n + 1))) : CReal)
+    :=
     by simpa using (CReal.abs_le_of_pre_abs_bound d hall')
   simpa [hseq, hlim, d, CReal.Pre.add, CReal.Pre.neg, sub_eq_add_neg] using h_abs
 
@@ -1559,10 +1585,12 @@ def makeCRealFunPre (f : UniformCtsQQ) (x : CReal.Pre) : CReal.Pre where
 /--
 Proof that the lifting mechanism respects equivalence.
 -/
-theorem makeCRealFunPre_respects_equiv (f : UniformCtsQQ) (x y : CReal.Pre) (hxy : CReal.Pre.Equiv x y) :
+theorem makeCRealFunPre_respects_equiv (f : UniformCtsQQ) (x y : CReal.Pre) (hxy : CReal.Pre.Equiv x
+  y) :
   CReal.Pre.Equiv (makeCRealFunPre f x) (makeCRealFunPre f y) := by
   intro n
-  -- We need to show |(makeCRealFunPre f x).approx (n+1) - (makeCRealFunPre f y).approx (n+1)| ≤ 1/2^n.
+  -- We need to show |(makeCRealFunPre f x).approx (n+1) - (makeCRealFunPre f y).approx (n+1)| ≤
+  -- 1/2^n.
   -- The approximations are calculated using ε' = 1/2^(n+2).
   let ε' : Gauge := ⟨(1:ℚ)/2^(n+2), by positivity⟩
   let δ' := f.modulus ε'
@@ -1779,7 +1807,8 @@ lemma exp_tail_le_geom (x : ℚ) (hx : |x| ≤ (1/2 : ℚ))
             (Finset.range (N + (t'+1) + 1)).sum a - (Finset.range (N + 1)).sum a
                 = ((Finset.range (N + t' + 1)).sum a + a (N + t' + 1))
                     - (Finset.range (N + 1)).sum a := by
-                  simpa [Nat.succ_eq_add_one, Nat.add_comm, Nat.add_left_comm, Nat.add_assoc] using this
+                  simpa [Nat.succ_eq_add_one, Nat.add_comm, Nat.add_left_comm, Nat.add_assoc] using
+                    this
             _ = ((Finset.range (N + t' + 1)).sum a - (Finset.range (N + 1)).sum a)
                   + a (N + t' + 1) := by ring
             _ = (Finset.range t').sum (fun j => a (N + 1 + j)) + a (N + t' + 1) := by
@@ -1826,7 +1855,8 @@ lemma exp_tail_le_geom (x : ℚ) (hx : |x| ≤ (1/2 : ℚ))
       (Finset.range t).sum (fun j => (1/2 : ℚ)^j) ≤ 2 := by
     have hcf := geom_closed t
     have hpow_nonneg : 0 ≤ (1/2 : ℚ)^t := by positivity
-    have hterm_nonneg : 0 ≤ 2 * (1/2 : ℚ)^t := Rat.mul_nonneg rfl hpow_nonneg --mul_nonneg (by norm_num) hpow_nonneg
+    have hterm_nonneg : 0 ≤ 2 * (1/2 : ℚ)^t := Rat.mul_nonneg rfl hpow_nonneg
+      --mul_nonneg (by norm_num) hpow_nonneg
     have : 2 - 2 * (1/2 : ℚ)^t ≤ 2 := by
       have : 2 - 2 * (1/2 : ℚ)^t ≤ 2 - 0 := by
         gcongr

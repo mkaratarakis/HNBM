@@ -32,7 +32,8 @@ def dyadicTwo  : Dyadic := ⟨1, 1⟩
 
 def quarter : FastReal := (⟨1, -2⟩ : Dyadic)
 def piOver4 : FastReal := FastReal.mul FastReal.pi quarter
-#eval (FastReal.tan? piOver4 18)                -- some ~ 1 (may be `none` if cos can't be certified away from 0)
+#eval (FastReal.tan? piOver4 18)               
+  -- some ~ 1 (may be `none` if cos can't be certified away from 0)
 
 -- `decide` demo (semi-decision via fuel + `Option`)
 #eval decide (FastReal.compare (2 : FastReal) (3 : FastReal) 40 == some Ordering.lt)

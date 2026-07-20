@@ -89,7 +89,8 @@ lemma abs_pow_succ_sub_pow_succ_le
               · exact mul_le_mul_of_nonneg_right ih hy_nonneg
         _ ≤ (1/2 : ℚ)^(k+1) * |x - y| +
               ((k+1 : ℚ) * (1/2 : ℚ)^k * |x - y|) * (1/2 : ℚ) := by
-              -- `add_le_add_left` in this file's namespace is for `CReal`; use the root lemma for `ℚ`.
+              -- `add_le_add_left` in this file's namespace is for `CReal`; use the root lemma for
+              -- `ℚ`.
               refine Rat.add_le_add_left.mpr ?_
               -- use `|y| ≤ 1/2` and nonnegativity of the other factor
               simpa [mul_assoc, mul_left_comm, mul_comm] using
@@ -98,7 +99,9 @@ lemma abs_pow_succ_sub_pow_succ_le
         _ = ((k + 1 : ℚ) + 1) * (1/2 : ℚ)^(k+1) * |x - y| := by
               -- simplify `... + (k+1)*...` with common factor `(1/2)^(k+1) * |x-y|`
               -- note `(1/2)^k * (1/2) = (1/2)^(k+1)`
-              ring_nf -- [pow_succ, mul_assoc, mul_left_comm, mul_comm, add_assoc, add_left_comm, add_comm]
+              -- (previously a hand-rolled simp set: pow_succ, mul_assoc,
+              -- mul_left_comm, mul_comm, add_assoc, add_left_comm, add_comm)
+              ring_nf
         _ ≤ (↑(k + 1) + 1) * (1/2 : ℚ)^(k+1) * |x - y| := by
               -- Just a cast-reassociation: `↑(k+1) = ↑k + 1`.
               simp [Nat.cast_add]
@@ -322,7 +325,8 @@ theorem expSmall_congr [Pre.SmallExpModulus]
     simpa [Nat.add_assoc] using inv_pow_antitone_succ n
   have hout' :
       |(Pre.small_exp (x.pre.approx (n + 6)) (x.bound (n + 6))).approx (n + 3) -
-        (Pre.small_exp (y.pre.approx (n + 6)) (y.bound (n + 6))).approx (n + 3)| ≤ (1 : ℚ) / 2 ^ n :=
+        (Pre.small_exp (y.pre.approx (n + 6)) (y.bound (n + 6))).approx (n + 3)| ≤ (1 : ℚ) / 2 ^ n
+          :=
     hout.trans (hmono3.trans hmono4)
   simpa [CReal.lim_pre, expSmallSeq, Nat.add_assoc, Nat.add_left_comm, Nat.add_comm] using hout'
 

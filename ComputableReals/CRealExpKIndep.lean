@@ -361,7 +361,8 @@ lemma expPartial_half_sq_le_tail (x : ℚ) (N : ℕ) :
       intro p hp
       have hp' := htrue p hp
       simp [hp']
-    -- Rewrite the antidiagonal sum to the standard `range (k+1)` form and use the diagonal identity.
+    -- Rewrite the antidiagonal sum to the standard `range (k+1)` form and use the diagonal
+    -- identity.
     have hr :
         (∑ p ∈ Finset.antidiagonal k, expCoeff (x / 2) p.1 * expCoeff (x / 2) p.2)
           =
@@ -394,9 +395,11 @@ lemma expPartial_half_sq_le_tail (x : ℚ) (N : ℕ) :
         = - ∑ t ∈ Finset.range N, a (N + 1 + t) := by
     calc
       expPartial x N - (∑ k ∈ Finset.range (2 * N + 1), a k)
-          = expPartial x N - ((∑ k ∈ Finset.range (N + 1), a k) + ∑ t ∈ Finset.range N, a (N + 1 + t)) := by
+          = expPartial x N - ((∑ k ∈ Finset.range (N + 1), a k) + ∑ t ∈ Finset.range N, a (N + 1 +
+            t)) := by
               simp [hsplit]
-      _ = expPartial x N - (∑ k ∈ Finset.range (N + 1), a k) - ∑ t ∈ Finset.range N, a (N + 1 + t) := by
+      _ = expPartial x N - (∑ k ∈ Finset.range (N + 1), a k) - ∑ t ∈ Finset.range N, a (N + 1 + t)
+        := by
               ring
       _ = - ∑ t ∈ Finset.range N, a (N + 1 + t) := by
               simp [hlow]
@@ -460,7 +463,8 @@ lemma expPartial_half_sq_le_tail (x : ℚ) (N : ℕ) :
                 intro i hi
                 simp [hterm i hi]
         _ = |x / 2| ^ k *
-              (∑ i ∈ Finset.range (k + 1), (1 : ℚ) / (Nat.factorial i * Nat.factorial (k - i))) := by
+              (∑ i ∈ Finset.range (k + 1), (1 : ℚ) / (Nat.factorial i * Nat.factorial (k - i))) :=
+                by
                 simp [div_eq_mul_inv, Finset.mul_sum]
         _ = |x / 2| ^ k * ((2 : ℚ) ^ k / Nat.factorial k) := by
                 rw [sum_inv_factorial_mul_inv_factorial k]
@@ -508,7 +512,8 @@ lemma expPartial_half_sq_le_tail (x : ℚ) (N : ℕ) :
                   (∑ t ∈ Finset.Ico 0 N, |expCoeff x (t + (N + 1))|)
                     =
                   ∑ k ∈ Finset.Ico (0 + (N + 1)) (N + (N + 1)), |expCoeff x k| :=
-                (Finset.sum_Ico_add' (f := fun k : ℕ => |expCoeff x k|) (a := 0) (b := N) (c := N + 1))
+                (Finset.sum_Ico_add' (f := fun k : ℕ => |expCoeff x k|) (a := 0) (b := N) (c := N +
+                  1))
               -- rewrite the left endpoint `0 + (N+1)` and the right endpoint `N + (N+1)`
               have hIco' :
                   (∑ t ∈ Finset.Ico 0 N, |expCoeff x (t + (N + 1))|)
@@ -595,7 +600,8 @@ lemma expPartial_half_sq_bound (x : ℚ) (hx : |x| ≤ (1/2 : ℚ)) (N : ℕ) :
         simpa [habs, hcoeff] using this
   -- Combine (tail sum ≤ expPartial difference ≤ bound).
   -- (If needed, insert a lemma rewriting the Icc tail sum into the expPartial difference.)
-  -- Rewrite the tail sum as the absolute `expPartial` difference (all coefficients are nonnegative),
+  -- Rewrite the tail sum as the absolute `expPartial` difference (all coefficients are
+  -- nonnegative),
   -- then use `hcore`.
   have htail :
       (∑ k ∈ Finset.Icc (N + 1) (2 * N), |expCoeff x k|) ≤ (1 : ℚ) / 2 ^ (N - 2) := by
@@ -606,7 +612,8 @@ lemma expPartial_half_sq_bound (x : ℚ) (hx : |x| ≤ (1/2 : ℚ)) (N : ℕ) :
       -- Step 1: `|expCoeff x k| = expCoeff |x| k`.
       have habsCoeff (k : ℕ) : |expCoeff x k| = expCoeff |x| k := by
         simp [expCoeff, abs_div, abs_pow]
-      -- Step 2: rewrite the Icc-sum as an Ico-sum and identify it with the difference of partial sums.
+      -- Step 2: rewrite the Icc-sum as an Ico-sum and identify it with the difference of partial
+      -- sums.
       have hmono : (N + 1) ≤ (2 * N + 1) := by
         have hN : N ≤ 2 * N := by
           simp [two_mul]
@@ -616,7 +623,8 @@ lemma expPartial_half_sq_bound (x : ℚ) (hx : |x| ≤ (1/2 : ℚ)) (N : ℕ) :
             = expPartial |x| (2 * N) - expPartial |x| N := by
         -- Use `sum_range_add_sum_Ico` and rearrange.
         have hsum' :=
-          (Finset.sum_range_add_sum_Ico (f := fun k : ℕ => expCoeff |x| k) (m := N + 1) (n := 2 * N + 1) hmono)
+          (Finset.sum_range_add_sum_Ico (f := fun k : ℕ => expCoeff |x| k) (m := N + 1) (n := 2 * N
+            + 1) hmono)
         -- Rewrite the range sums as `expPartial`.
         have hsum'' :
             expPartial |x| N + (∑ k ∈ Finset.Ico (N + 1) (2 * N + 1), expCoeff |x| k)
@@ -696,7 +704,8 @@ theorem small_exp_halve_mul_equiv (x : ℚ) (hx : |x| ≤ (1/2 : ℚ)) :
       -- `1/2^(n+1+S) ≤ 1/2^(n+1)`
       have : n + 1 ≤ n + 1 + S := Nat.le_add_right _ _
       have hp : (2 : ℚ) ^ (n + 1) ≤ (2 : ℚ) ^ (n + 1 + S) := by
-        exact (pow_le_pow_iff_right₀ rfl).mpr this-- pow_le_pow_of_le_left (by nlinarith : (0 : ℚ) ≤ 2) (by norm_num : (1 : ℚ) ≤ 2) this
+        exact (pow_le_pow_iff_right₀ rfl).mpr
+          this-- pow_le_pow_of_le_left (by nlinarith : (0 : ℚ) ≤ 2) (by norm_num : (1 : ℚ) ≤ 2) this
       have hpos : (0 : ℚ) < (2 : ℚ) ^ (n + 1) := by
         have : (0 : ℚ) < (2 : ℚ) := by norm_num
         exact pow_pos this _

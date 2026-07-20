@@ -24,6 +24,9 @@ import ComputableReals.CRealSigmoid
 import ComputableReals.CRealSqrt
 import ComputableReals.CRealSqrtQ
 import ComputableReals.CRealsFast
+import ComputableReals.CRealsFast.Ball
+import ComputableReals.CRealsFast.Dyadic
+import ComputableReals.CRealsFast.FastReal
 import ComputableReals.CRealsFastBackend
 import ComputableReals.CRealsFastExamples
 import ComputableReals.Computable.CComplexRefine

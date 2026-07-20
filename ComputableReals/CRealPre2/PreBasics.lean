@@ -89,7 +89,11 @@ theorem equiv_trans {x y z : CReal.Pre} (hxy : x ≈ y) (hyz : y ≈ z) : x ≈ 
         + |x.approx m_idx - y.approx m_idx|
         + |y.approx m_idx - z.approx m_idx|
         + |z.approx m_idx - z.approx (k + 1)| := by
-          rw [show x.approx (k+1) - z.approx (k+1) = (x.approx (k+1) - x.approx m_idx) + (x.approx m_idx - y.approx m_idx) + (y.approx m_idx - z.approx m_idx) + (z.approx m_idx - z.approx (k+1)) by ring]
+          rw [show x.approx (k+1) - z.approx (k+1)
+              = (x.approx (k+1) - x.approx m_idx)
+                + (x.approx m_idx - y.approx m_idx)
+                + (y.approx m_idx - z.approx m_idx)
+                + (z.approx m_idx - z.approx (k+1)) by ring]
           exact abs_add_four _ _ _ _
     _ ≤ (1:ℚ) / 2^(k+1) + (1:ℚ) / 2^(m_idx-1) + (1:ℚ) / 2^(m_idx-1) + (1:ℚ) / 2^(k+1) := by
         gcongr
@@ -140,7 +144,8 @@ lemma abs_approx_le_cBound (x : CReal.Pre) (n : ℕ) : |x.approx n| ≤ x.cBound
   have h_triangle : |x.approx n| ≤ |x.approx n - x.approx 0| + |x.approx 0| :=
     calc |x.approx n|
       = |(x.approx n - x.approx 0) + x.approx 0| := by ring_nf
-    _ ≤ |x.approx n - x.approx 0| + |x.approx 0| := abs_add_le (x.approx n - x.approx 0) (x.approx 0)
+    _ ≤ |x.approx n - x.approx 0| + |x.approx 0| := abs_add_le (x.approx n - x.approx 0) (x.approx
+      0)
   calc
     |x.approx n| ≤ |x.approx n - x.approx 0| + |x.approx 0| := h_triangle
     _ ≤ 1 + |x.approx 0| := by linarith [h_reg]

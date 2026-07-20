@@ -119,7 +119,8 @@ theorem abs_toRat_approx_sub_le (x : Dyadic) (n : Nat) :
     have : x.toRat - y.toRat < (dyadicUlp n).toRat := by
       -- from `x < y + ulp`, we have x.toRat < y.toRat + (dyadicUlp n).toRat
       have h : x.toRat < y.toRat + (dyadicUlp n).toRat := by
-        have heq : (y + dyadicUlp n).toRat = y.toRat + (dyadicUlp n).toRat := Dyadic.toRat_add y (dyadicUlp n)
+        have heq : (y + dyadicUlp n).toRat = y.toRat + (dyadicUlp n).toRat := Dyadic.toRat_add y
+          (dyadicUlp n)
         rw [heq] at hlt
         exact hlt
       linarith
