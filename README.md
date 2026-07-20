@@ -11,7 +11,7 @@ lake exe cache get   # fetch Mathlib build artifacts (first time)
 lake build
 ```
 
-51 modules, ~15,500 lines, **zero `sorry`s**.
+52 modules, ~15,700 lines, **zero `sorry`s**.
 
 ## The three layers
 
@@ -104,6 +104,28 @@ unproven primitives from the verified ones.
 against Mathlib's `Complex.exp`, `cos` and `sin`. Prefer the `V` forms when a
 theorem is wanted; the unadorned ones are faster and remain unproven.
 
+### The complex square root
+
+`Computable/SqrtComplexSound.lean`. This is the first genuinely
+*branch-dependent* function here, and the branch cannot always be chosen
+computably: the principal root of `a + bi` takes its imaginary sign from the
+sign of `b`, and deciding `b < 0` is undecidable when `b = 0`. A total
+verified complex `sqrt` therefore cannot exist, for the same reason a
+decidable order cannot.
+
+`sqrtV?` is the fueled version: it asks `compare` for the sign of the
+imaginary part and, when that is decided — which includes the exact-zero
+case, since radius-`0` balls compare exactly — returns the principal root;
+otherwise `none`. `sqrtV?_sound` proves the answer encloses `principalSqrt`,
+and `principalSqrt_sq` proves that really is a square root
+(`principalSqrt c * principalSqrt c = c`), so `sqrtV?_sq` gives the
+end-to-end statement: what the engine returns encloses a genuine square root
+of the enclosed value.
+
+Soundness is stated against the closed form rather than `c ^ (1/2 : ℂ)`
+deliberately — `cpow` unfolds through `Complex.log` and hence `arg`, neither
+of which is verified here (see **Known gaps**).
+
 ### The refinement triangle
 
 `Computable/CComplexRefine.lean` relates the two models directly:
@@ -121,14 +143,26 @@ application layer that uses it stayed behind there; everything here is
 generic and imports only Mathlib. Theorem names were preserved through the
 split, so results stay citable across both repositories.
 
-## Known gap
+## Known gaps
 
-`CRealAQDyadicEquiv.lean` (surjectivity of the dyadic backend) is present but
-**not** imported by the root module, because it does not compile. It arrived
-broken; its `Dyadic.ulp` and `pow_le_pow_of_le_left` bitrot is now repaired
-(the first by reusing the equivalent bound already proved in
-`CRealPreDyadic.lean`), taking it from 14 errors to 4. What remains is an
-**ambiguous `≈`** at `repOfPre_toPre_equiv`: two `Setoid` instances on
-`CReal.Pre` are simultaneously in scope, which looks like fallout from closing
-the `RatCast`/`Field` instance diamond. Resolving that is a design decision
-about which instance should win, so it is left flagged rather than patched.
+**`arg` and the complex logarithm are not verified, and are blocked one
+layer down.** `FastComplex.arg?` and `log?` run, but neither has a soundness
+theorem, and neither can get one until the *real* layer does: `arg` needs a
+verified `atan2`, which needs a verified `Real.arctan`; `log z = log ‖z‖ +
+i · arg z` needs that plus a verified real logarithm. Neither
+`FastReal.atan` nor `FastReal.log?` carries a soundness theorem today, so
+this is a real-analysis gap rather than a complex one. Each is a development
+comparable in size to the existing `ExpSound` / `TrigSound` files. A cheaper
+route for the logarithm is to invert the already-verified `expV` by
+bisection, proving soundness from monotonicity of `Real.exp` via
+`Real.le_log_iff_exp_le`, which avoids a fresh series analysis entirely.
+
+**Precision monotonicity.** Nothing states that increasing precision shrinks
+a ball's radius; that needs engine-level convergence facts which do not
+exist yet. Structural congruence lemmas for `Encloses` are provided instead.
+
+**`CRealAQDyadicEquiv.lean`** is present but not imported by the root module:
+it arrived broken, its `Dyadic.ulp` and `pow_le_pow_of_le_left` bitrot is
+repaired, and what remains is an ambiguous `≈` from two `Setoid` instances on
+`CReal.Pre` in scope — a design decision about which instance should win,
+left flagged rather than patched.

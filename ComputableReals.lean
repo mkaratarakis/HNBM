@@ -38,6 +38,7 @@ import ComputableReals.Computable.GibbsSound
 import ComputableReals.Computable.InvSound
 import ComputableReals.Computable.Preservation
 import ComputableReals.Computable.Refinement
+import ComputableReals.Computable.SqrtComplexSound
 import ComputableReals.Computable.SqrtSound
 import ComputableReals.Computable.TrigSound
 import ComputableReals.Decision
