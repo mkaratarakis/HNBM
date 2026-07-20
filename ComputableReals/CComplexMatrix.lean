@@ -122,6 +122,40 @@ example {k : ℕ} (U V : Matrix.unitaryGroup (Fin k) CComplex) :
     (↑(U * V) : CMatrix k) ∈ Matrix.unitaryGroup (Fin k) CComplex :=
   (U * V).2
 
+/-! ## Kronecker product: composing modes on the specification side
+
+Indexed by `Fin (m * p)` with `Fin.divNat`/`Fin.modNat`, matching the
+convention of the executable `FastMatrix.kron`, so the two correspond
+entrywise under `toComplex`.
+-/
+
+/-- Kronecker (tensor) product of specification-model complex matrices. -/
+def kron {m n p q : ℕ} (A : Matrix (Fin m) (Fin n) CComplex)
+    (B : Matrix (Fin p) (Fin q) CComplex) :
+    Matrix (Fin (m * p)) (Fin (n * q)) CComplex :=
+  fun i j => A i.divNat j.divNat * B i.modNat j.modNat
+
+@[simp] theorem kron_apply {m n p q : ℕ} (A : Matrix (Fin m) (Fin n) CComplex)
+    (B : Matrix (Fin p) (Fin q) CComplex) (i : Fin (m * p)) (j : Fin (n * q)) :
+    kron A B i j = A i.divNat j.divNat * B i.modNat j.modNat := rfl
+
+/-- The Kronecker product commutes with the map to Mathlib's `ℂ`. -/
+@[simp] theorem toComplex_kron {m n p q : ℕ} (A : Matrix (Fin m) (Fin n) CComplex)
+    (B : Matrix (Fin p) (Fin q) CComplex) (i : Fin (m * p)) (j : Fin (n * q)) :
+    toComplex (kron A B i j)
+      = toComplex (A i.divNat j.divNat) * toComplex (B i.modNat j.modNat) := by
+  have h := map_mul toComplexRingHom (A i.divNat j.divNat) (B i.modNat j.modNat)
+  simpa [kron] using h
+
+/-- `kron` is associative on entries up to the index arithmetic, in the
+degenerate case where one factor is `1 × 1`: tensoring with a scalar is
+scaling. -/
+theorem kron_one_left {n q : ℕ} (A : Matrix (Fin 1) (Fin 1) CComplex)
+    (B : Matrix (Fin n) (Fin q) CComplex) (i : Fin (1 * n)) (j : Fin (1 * q)) :
+    kron A B i j = A 0 0 * B i.modNat j.modNat := by
+  simp [kron, Subsingleton.elim (i.divNat) 0, Subsingleton.elim (j.divNat) 0]
+
+
 end CComplex
 
 end Computable

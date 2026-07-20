@@ -143,6 +143,109 @@ theorem unitaryUpTo_sound {U : FastMatrix n n} {M : Matrix (Fin n) (Fin n) ℂ}
     mul_encloses hU (conjTranspose_encloses hU)
   exact approxEq_sound hUU one_encloses h
 
+/-! ## Vectors: propagating a state through a device
+
+`mulVec` is how light actually moves through a component: an amplitude
+vector goes in, an amplitude vector comes out. Enclosure for it is what
+turns an executable simulation into a statement about the true complex
+amplitudes.
+-/
+
+/-- Entrywise enclosure of a complex vector by a vector of `FastComplex`. -/
+def VecEncloses (v : Fin n → FastComplex) (w : Fin n → ℂ) : Prop :=
+  ∀ i, (v i).Encloses (w i)
+
+/-- **Applying a matrix to a vector preserves enclosure.** -/
+theorem mulVec_encloses {A : FastMatrix m n} {M : Matrix (Fin m) (Fin n) ℂ}
+    {v : Fin n → FastComplex} {w : Fin n → ℂ}
+    (hA : A.Encloses M) (hv : VecEncloses v w) :
+    VecEncloses (A.mulVec v) (M.mulVec w) := by
+  intro i
+  show (FastMatrix.sumFin (fun k => A i k * v k)).Encloses ((M.mulVec w) i)
+  have : (M.mulVec w) i = ∑ k, M i k * w k := by
+    simp [Matrix.mulVec, dotProduct]
+  rw [this]
+  exact sumFin_encloses (fun k => FastComplex.mul_encloses (hA i k) (hv k))
+
+/-- A vector of literals encloses itself entrywise (convenience wrapper). -/
+theorem vecEncloses_of (v : Fin n → FastComplex) (w : Fin n → ℂ)
+    (h : ∀ i, (v i).Encloses (w i)) : VecEncloses v w := h
+
+/-! ## The remaining matrix operations -/
+
+/-- The zero matrix encloses `0`. -/
+theorem zero_encloses : (FastMatrix.zero : FastMatrix m n).Encloses 0 :=
+  fun _ _ => FastComplex.encloses_zero
+
+/-- Addition preserves enclosure. -/
+theorem add_encloses {A B : FastMatrix m n} {M N : Matrix (Fin m) (Fin n) ℂ}
+    (hA : A.Encloses M) (hB : B.Encloses N) : (A + B).Encloses (M + N) :=
+  fun i j => FastComplex.add_encloses (hA i j) (hB i j)
+
+/-- Negation preserves enclosure. -/
+theorem neg_encloses {A : FastMatrix m n} {M : Matrix (Fin m) (Fin n) ℂ}
+    (hA : A.Encloses M) : (-A).Encloses (-M) :=
+  fun i j => FastComplex.neg_encloses (hA i j)
+
+/-- Scalar multiplication preserves enclosure. -/
+theorem smul_encloses {c : FastComplex} {d : ℂ} {A : FastMatrix m n}
+    {M : Matrix (Fin m) (Fin n) ℂ}
+    (hc : c.Encloses d) (hA : A.Encloses M) : (c • A).Encloses (d • M) :=
+  fun i j => FastComplex.mul_encloses hc (hA i j)
+
+/-- Transpose preserves enclosure. -/
+theorem transpose_encloses {A : FastMatrix m n} {M : Matrix (Fin m) (Fin n) ℂ}
+    (hA : A.Encloses M) : (FastMatrix.transpose A).Encloses Mᵀ :=
+  fun i j => hA j i
+
+/-- The trace encloses Mathlib's trace. -/
+theorem trace_encloses {A : FastMatrix n n} {M : Matrix (Fin n) (Fin n) ℂ}
+    (hA : A.Encloses M) : (FastMatrix.trace A).Encloses (Matrix.trace M) := by
+  show (FastMatrix.sumFin (fun i => A i i)).Encloses (Matrix.trace M)
+  have : Matrix.trace M = ∑ i, M i i := rfl
+  rw [this]
+  exact sumFin_encloses (fun i => hA i i)
+
+/-! ## Kronecker product: composing optical modes
+
+`FastMatrix.kron` is indexed by `Fin (m * p)` and splits an index with
+`Fin.divNat`/`Fin.modNat`. The enclosed Mathlib matrix is the same
+index-split of the entrywise product, which is Mathlib's Kronecker product
+transported along `finProdFinEquiv`.
+-/
+
+/-- The `Fin (m * p)`-indexed Kronecker product of two Mathlib matrices,
+matching `FastMatrix.kron`'s indexing convention. -/
+def kronM (MA : Matrix (Fin m) (Fin n) ℂ) (MB : Matrix (Fin p) (Fin q) ℂ) :
+    Matrix (Fin (m * p)) (Fin (n * q)) ℂ :=
+  fun i j => MA i.divNat j.divNat * MB i.modNat j.modNat
+
+/-- **The Kronecker product preserves enclosure** — composing two certified
+components gives a certified composite. -/
+theorem kron_encloses {A : FastMatrix m n} {B : FastMatrix p q}
+    {MA : Matrix (Fin m) (Fin n) ℂ} {MB : Matrix (Fin p) (Fin q) ℂ}
+    (hA : A.Encloses MA) (hB : B.Encloses MB) :
+    (A.kron B).Encloses (kronM MA MB) :=
+  fun i j => FastComplex.mul_encloses (hA _ _) (hB _ _)
+
+/-- `kronM` really is the entrywise Kronecker rule. -/
+@[simp] theorem kronM_apply (MA : Matrix (Fin m) (Fin n) ℂ)
+    (MB : Matrix (Fin p) (Fin q) ℂ) (i : Fin (m * p)) (j : Fin (n * q)) :
+    kronM MA MB i j = MA i.divNat j.divNat * MB i.modNat j.modNat := rfl
+
+/-! ## Structural lemmas -/
+
+/-- Enclosure only depends on the entries, so it transfers along entrywise
+equality of the executable matrices. -/
+theorem Encloses.congr {A B : FastMatrix m n} {M : Matrix (Fin m) (Fin n) ℂ}
+    (hA : A.Encloses M) (h : ∀ i j, A i j = B i j) : B.Encloses M := by
+  intro i j; rw [← h i j]; exact hA i j
+
+/-- Enclosure transfers along entrywise equality of the enclosed matrices. -/
+theorem Encloses.congr_right {A : FastMatrix m n} {M N : Matrix (Fin m) (Fin n) ℂ}
+    (hA : A.Encloses M) (h : ∀ i j, M i j = N i j) : A.Encloses N := by
+  intro i j; rw [← h i j]; exact hA i j
+
 /-! ## Demo: a balanced beam splitter is certifiably unitary
 
 The `2×2` Hadamard beam splitter `(1/√2)·[[1,1],[1,−1]]` — with the

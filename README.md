@@ -11,7 +11,7 @@ lake exe cache get   # fetch Mathlib build artifacts (first time)
 lake build
 ```
 
-47 modules, ~15,000 lines, **zero `sorry`s**.
+51 modules, ~15,500 lines, **zero `sorry`s**.
 
 ## The three layers
 
@@ -65,17 +65,53 @@ On top of that sits the linear-algebra layer that photonics needs:
   certificate `unitaryUpTo`, which checks `U†U = I` to a given precision and
   answers honestly (`false` when it cannot certify).
 - `Computable/FastMatrixSound.lean` — the enclosure relation for matrices
-  and the theorems carrying it through the operations, so a `unitaryUpTo`
-  certificate is a statement about the true complex matrix rather than about
-  floating-point residue.
+  and vectors, carried through `mul`, `mulVec` (propagating a state through a
+  device), `kron` (composing modes), `conjTranspose`, `trace`, `transpose`
+  and the linear operations, so a `unitaryUpTo` certificate is a statement
+  about the true complex matrix rather than about floating-point residue.
+- `CComplexTrans.lean` — `exp`, `log`, `sin`, `cos`, `sqrt` and `arg` on the
+  specification model. These are transported along `CComplex ≃+* ℂ` and so
+  are noncomputable; an intrinsic construction awaits total `CReal.exp`,
+  `CReal.cos` and `CReal.sin`, which do not exist yet.
 - `FastComplexMatrixExamples.lean` — a beam splitter and a phase shifter,
   their composition `UPU φ`, and Kronecker products of unitaries, all
   certified unitary; plus a deliberate negative test (`2·U` is not unitary,
   certificate `false`).
 
-A beam splitter composed with a phase shifter, verified unitary and
-evaluated at arbitrary precision, is a two-mode interferometer — the base
-case for the optics work this library is intended to support.
+### Certified components
+
+`Computable/ComponentsSound.lean` closes the loop. `unitaryUpTo_sound` needs
+an `Encloses` hypothesis, and until recently nothing discharged it for an
+actual component — the `#eval`s said "the certificate fired", not "this beam
+splitter is unitary". Now:
+
+- `beamSplitterV` encloses `bsM`, and `bsM * bsMᴴ = 1` **exactly**;
+- `phaseShifterV φ` encloses `psM φ`, and `psM φ * (psM φ)ᴴ = 1` **exactly**;
+- `mzV φ` (a Mach–Zehnder-style `BS · P(φ) · BS`) encloses `mzM φ`, unitary
+  as a product of unitaries.
+
+Because the enclosed matrices are exactly unitary, these conclusions carry no
+tolerance at all: the executable object you can `#eval` is paired with a
+theorem about the complex matrix it denotes, and composition needs no new
+numerical reasoning — `mul_encloses` carries the enclosure through.
+
+### Verified vs runtime primitives
+
+As with `exp`/`expV` on the reals, the complex layer distinguishes the fast
+unproven primitives from the verified ones.
+`Computable/FastComplexTransSound.lean` supplies `expV`, `cosV`, `sinV` and
+`fromPolarV`, built on the verified real `expV`/`cosV`/`sinV` and proved
+against Mathlib's `Complex.exp`, `cos` and `sin`. Prefer the `V` forms when a
+theorem is wanted; the unadorned ones are faster and remain unproven.
+
+### The refinement triangle
+
+`Computable/CComplexRefine.lean` relates the two models directly:
+`FastComplex.EnclosesC z w` says the executable `z` encloses the
+*specification* value `w`, and every operation — arithmetic and the verified
+transcendentals — respects it. So a theorem proved in `CComplex`, where you
+have a field and can rewrite freely, transfers to a statement about what the
+engine actually computes, without unfolding a ball.
 
 ## Provenance
 

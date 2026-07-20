@@ -2,6 +2,7 @@ import ComputableReals.CComplex
 import ComputableReals.CComplexAbs
 import ComputableReals.CComplexBridge
 import ComputableReals.CComplexMatrix
+import ComputableReals.CComplexTrans
 import ComputableReals.CRealAQ
 import ComputableReals.CRealAQBackendEquiv
 import ComputableReals.CRealAQOrder
@@ -25,9 +26,12 @@ import ComputableReals.CRealSqrtQ
 import ComputableReals.CRealsFast
 import ComputableReals.CRealsFastBackend
 import ComputableReals.CRealsFastExamples
+import ComputableReals.Computable.CComplexRefine
+import ComputableReals.Computable.ComponentsSound
 import ComputableReals.Computable.ExpSound
 import ComputableReals.Computable.FastComplexDivSound
 import ComputableReals.Computable.FastComplexSound
+import ComputableReals.Computable.FastComplexTransSound
 import ComputableReals.Computable.FastLogistic
 import ComputableReals.Computable.FastMatrixSound
 import ComputableReals.Computable.GibbsSound
