@@ -3,10 +3,10 @@ Copyright (c) 2026 Michail Karatarakis. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Michail Karatarakis
 -/
-import HopfieldNet.CReals.Computable.FastComplexSound
+import ComputableReals.Computable.FastComplexSound
 import HopfieldNet.CReals.Computable.QuiverBridge
-import HopfieldNet.CReals.Computable.ExpSound
-import HopfieldNet.CReals.FastComplexMatrix
+import ComputableReals.Computable.ExpSound
+import ComputableReals.FastComplexMatrix
 import Mathlib.LinearAlgebra.Matrix.ConjTranspose
 
 /-!

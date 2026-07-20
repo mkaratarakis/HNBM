@@ -12,6 +12,9 @@ package «HopfieldNet» where
 lean_lib «HopfieldNet» where
   -- add any library configuration options here
 
+lean_lib «ComputableReals» where
+  -- Standalone computable-real/complex library: depends only on Mathlib.
+
 lean_lib MCMC where
   -- Builds the `MCMC.*` modules living under the top-level `MCMC/` directory.
 

@@ -1,58 +1,52 @@
-# Computable reals (`CReals`) and executable NN computations
+# CReals — the Hopfield/Boltzmann application layer
 
-Migrated from `mkaratarakis/HopfieldNet` (branch `creal-nn-run`) to this
-repository's toolchain (Lean v4.30.0) and Quiver-based `NeuralNetwork` API.
+The generic computable-real and computable-complex machinery no longer lives
+here. It was extracted into the standalone [`ComputableReals`](../../ComputableReals)
+library at the repository root, which depends on Mathlib alone and is
+intended to be lifted into its own repository.
 
-## Layout
+What remains in this folder is exactly the part that mentions a neural
+network: a weight matrix, an energy, a Gibbs chain, or the Quiver-based
+`NeuralNetwork` structure. Each file here imports the generic layer from
+`ComputableReals.*` and adds the network-specific content on top.
 
-**The computation path** (what you `#eval`):
+## Contents
 
-- `CRealsFast.lean` — the execution engine: ball arithmetic (dyadic midpoint
-  ± radius) over GMP-backed `Int`, with `exp`, `sqrt`, `π`, and a total,
-  fuel-based `FastReal.compare`. Two improvements over the original:
-  rounding error is added to the radius *only when rounding actually changed
-  the midpoint* (so exact dyadic computations stay radius-0 end-to-end), and
-  `compare` decides **exact ties** (`some .eq`) when both balls are points.
-- `CRealsFastExamples.lean` — engine demos (`exp 1`, `π` to 12 digits, …).
-- `API/Basic.lean` — fueled comparisons (`eqF`, `leF`), executable threshold
-  activations (`binaryStep`, `signStep`), integer rendering of states, and a
-  generic certified stabilizer `stabilizeF` for any
-  `NeuralNetwork FastReal (Fin n) FastReal`. Stability is *decided*, never
-  assumed: results carry decidedness certificates.
-- `API/NNtest.lean` — 3-neuron threshold network: both update sequences give
-  `[1, 1, 1]`; the run hits the exact tie `net = 0` and decides it.
-- `API/HNtest.lean` — 4-neuron Hebbian Hopfield network, matching the `ℚ`
-  test exactly: stable state `[-1, 1, -1, 1]`, convergence in 2 steps, both
-  stored patterns verified as fixed points.
+- `API/Basic.lean` — the `NeuralNetwork`-typed helpers: the fueled stability
+  test `isStableF` and the certified stabilizer `stabilizeF`. The generic
+  fueled predicates they are built from (`eqF`, `leF`, `binaryStep`,
+  `signStep`, `actsToInts`) live in `ComputableReals/Decision.lean`.
+- `API/NNtest.lean` — 3-neuron threshold network; both update sequences give
+  `[1, 1, 1]`, and the run hits the exact tie `net = θ` and decides it.
+- `API/HNtest.lean` — 4-neuron Hebbian Hopfield network matching the `ℚ`
+  test exactly: stable state `[-1, 1, -1, 1]`, convergence in 2 steps.
+- `Computable/FastEnergy.lean` — executable network energy and descent
+  certificates over `FastReal`.
+- `Computable/EnergySound.lean` — enclosure for the energy (`netF_encloses`,
+  `EF_encloses`) and `descentCertified?_sound`: a certified descent really is
+  a non-increasing chain of the enclosed `ℝ`-valued energies.
+- `Computable/NNGibbs.lean` — executable Gibbs sampling and its soundness:
+  `gibbsSiteUpdate?`/`gibbsSweep?` and the verified `…V?` variants built on
+  the unconditional `expV`, with `gibbsSweepV?_sound` showing the executable
+  chain is the true Gibbs chain.
+- `Computable/QuiverBridge.lean` — connects the fueled activation steps to
+  the Quiver `HopfieldNetwork` instance.
+- `Computable/FastMatrixSound.lean` — enclosure for complex matrices, used
+  for the unitarity certificates.
+- `Computable/Demos/` — runnable Gibbs and contrastive-divergence demos.
+- `ComputableRealsBridge.lean` — `HasToReal`/`IsHamiltonianR` and the
+  transfer of energy statements into Mathlib's analysis.
 
-**The specification stack** (what you prove against):
+## Note on the split
 
-- `CRealPre2/` + `CRealPre2.lean` — spec model: quotient of regular Cauchy
-  sequences of rationals, with ring/order theory.
-- `CRealAQ.lean`, `CRealAQOrder.lean`, `CRealRep.lean` — implementation
-  model over "approximate rationals" backends, with proved equivalences
-  (`CRealAQBackendEquiv.lean`).
-- `CRealRealEquiv.lean` — bridge `CReal →+* ℝ` for theorem transfer.
-- `CRealExp*.lean`, `CRealLog.lean`, `CRealSigmoid.lean` — exp/log/sigmoid
-  on the spec model (sigmoid is the Boltzmann-machine ingredient).
-- `CRealCCLOF.lean` — `CReal` is a conditionally complete linear ordered
-  field (ported to the v4.30 `isLUB_csSup`/`isGLB_csInf` API).
-- `SOTA.lean` — the façade: prove against `RealSpec`, run against
-  `RealImpl`/`FastReal`.
+`Computable/NNGibbs.lean` was assembled from the network-specific halves of
+four previously mixed files (`Refinement`, `ExpSound`, `FastLogistic`,
+`GibbsSound`), whose generic halves moved to `ComputableReals`. The
+mathematics is unchanged; the theorems kept their names.
 
-## Build status (Lean v4.30.0, Mathlib v4.30.0)
-
-Everything builds and all `#eval`s produce the expected results, **except**
-two files with known v4.27→v4.30 bitrot (nothing else depends on them):
-
-- `CRealAQDyadicEquiv.lean` — uses `Dyadic.ulp`, removed from Mathlib's
-  `Dyadic` API; plus `pow_le_pow_of_le_left` rename fallout.
-- `Examples.lean` — spec-model demos; v4.30 routes `Mul CReal`/`toString`
-  through the (intentionally) noncomputable `Field CReal` instance, so the
-  `#eval`s no longer compile. The executable demos live in
-  `CRealsFastExamples.lean` and `API/` instead.
-
-```
-lake build HopfieldNet.CReals.API.NNtest HopfieldNet.CReals.API.HNtest
-lake build HopfieldNet.CReals.SOTA
-```
+Splitting them removed an accidental dependency worth remembering: the
+soundness foundation `Refinement.lean` used to import
+`FastEnergy → API.Basic → NeuralNetwork`, so the entire verified layer
+transitively depended on Hopfield code for no mathematical reason. Files
+that genuinely need `FastEnergy` (such as `EnergySound.lean`) now say so
+explicitly instead of inheriting it by accident.

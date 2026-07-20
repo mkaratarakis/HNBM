@@ -4,7 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Michail Karatarakis
 -/
 import HopfieldNet.Quiver.HN.HNquivHebbian
-import HopfieldNet.CReals.CRealCCLOF
+import ComputableReals.CRealCCLOF
 
 /-!
 # Computable reals bridge (principled theorem-transfer layer)

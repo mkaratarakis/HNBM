@@ -4,7 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Michail Karatarakis
 -/
 import HopfieldNet.Quiver.NeuralNetwork.Main
-import HopfieldNet.CReals.CRealsFast
+import ComputableReals.Decision
 
 /-!
 # Minimal API: neural-network computations over computable reals
@@ -36,42 +36,6 @@ activations); `NNtest.lean` and `HNtest.lean` port the two test suites.
 open Computable.Fast
 
 namespace Computable.Fast.API
-
-/-- Default fuel for fueled comparisons. Irrelevant for exact (radius-`0`)
-inputs, which are decided at the first probe. -/
-def defaultFuel : ℕ := 60
-
-/-- Fueled equality test: `some true`/`some false` if decided, `none` if the
-balls neither separate nor become exact points within fuel. -/
-def eqF (x y : FastReal) (fuel : ℕ := defaultFuel) : Option Bool :=
-  (FastReal.compare x y fuel).map (· == Ordering.eq)
-
-/-- Fueled `x ≤ y` test. -/
-def leF (x y : FastReal) (fuel : ℕ := defaultFuel) : Option Bool :=
-  (FastReal.compare x y fuel).map (· != Ordering.gt)
-
-/-- Binary threshold activation, executable: `1` if `0 ≤ net`, `0` if
-`net < 0`, current activation if undecided within fuel. -/
-def binaryStep (curr net : FastReal) (fuel : ℕ := defaultFuel) : FastReal :=
-  match FastReal.compare net 0 fuel with
-  | some Ordering.lt => 0
-  | some _ => 1
-  | none => curr
-
-/-- Hopfield (`±1`) threshold activation, executable: `1` if `θ ≤ net`,
-`-1` if `net < θ`, current activation if undecided within fuel.
-This is the fueled twin of `ℚ`'s `HNfact` (`if θ ≤ net then 1 else -1`). -/
-def signStep (curr net θ : FastReal) (fuel : ℕ := defaultFuel) : FastReal :=
-  match FastReal.compare net θ fuel with
-  | some Ordering.lt => -1
-  | some _ => 1
-  | none => curr
-
-/-- Render an activation vector as integers (via fueled sign), for readable
-`#eval` output: `some [1, -1, ...]`, or `none` if some sign is undecided. -/
-def actsToInts {n : ℕ} (act : Fin n → FastReal) (fuel : ℕ := defaultFuel) :
-    Option (List Int) :=
-  (List.finRange n).mapM (fun u => FastReal.sign (act u) fuel)
 
 variable {n : ℕ} {NN : NeuralNetwork FastReal (Fin n) FastReal}
 

@@ -3,7 +3,8 @@ Copyright (c) 2026 Michail Karatarakis. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Michail Karatarakis
 -/
-import HopfieldNet.CReals.Computable.Preservation
+import ComputableReals.Computable.Preservation
+import HopfieldNet.CReals.Computable.FastEnergy
 
 /-!
 # End-to-end: certified energy descent is real energy descent
@@ -52,6 +53,43 @@ theorem FastReal.foldl_encloses {α : Type} (step : FastReal → α → FastReal
       (hstep init rinit a List.mem_cons_self h)
 
 namespace FastEnergy
+
+/-! ## Soundness of descent certificates -/
+
+
+/-- **A certified descent really descends.** If the energies `es` enclose
+reals `rs` and `descentCertified? es = some true`, then `rs` is a
+non-increasing chain: the executable certificate of
+`Computable/FastEnergy.lean` is a proof about the enclosed `ℝ`-valued
+energies (which the bridge's `energyToReal` then places inside Mathlib's
+analysis). -/
+theorem descentCertified?_sound {fuel : ℕ} :
+    ∀ {es : List FastReal} {rs : List ℝ},
+      List.Forall₂ FastReal.Encloses es rs →
+      descentCertified? es fuel = some true →
+      List.IsChain (fun a b => b ≤ a) rs := by
+  intro es rs hf
+  induction hf with
+  | nil => intro _; exact List.isChain_nil
+  | @cons e r es' rs' her htl ih =>
+    intro h
+    cases htl with
+    | nil => exact List.isChain_singleton r
+    | @cons e' r' es'' rs'' her' htl' =>
+      -- unfold one step of the certificate
+      have hstep : ∃ b1 b2, API.leF e' e fuel = some b1 ∧
+          descentCertified? (e' :: es'') fuel = some b2 ∧ (b1 && b2) = true := by
+        unfold descentCertified? at h
+        simp only [Option.bind_eq_bind', Option.pure_def,
+          Option.bind_eq_some_iff, Option.some.injEq] at h
+        obtain ⟨b1, hb1, b2, hb2, hband⟩ := h
+        exact ⟨b1, b2, hb1, hb2, hband⟩
+      obtain ⟨b1, b2, hle, hrec, hand⟩ := hstep
+      obtain ⟨hb1, hb2⟩ := Bool.and_eq_true _ _ |>.mp hand
+      subst hb1; subst hb2
+      have hstep_le : r' ≤ r := API.leF_sound her' her hle
+      have htail := ih hrec
+      exact List.isChain_cons_cons.mpr ⟨hstep_le, htail⟩
 
 /-! ## The `ℝ`-valued twins of the executable energy -/
 

@@ -1,0 +1,50 @@
+import ComputableReals.CComplex
+import ComputableReals.CComplexAbs
+import ComputableReals.CComplexBridge
+import ComputableReals.CComplexMatrix
+import ComputableReals.Computable.ExpSound
+import ComputableReals.Computable.FastComplexDivSound
+import ComputableReals.Computable.FastComplexSound
+import ComputableReals.Computable.FastLogistic
+import ComputableReals.Computable.GibbsSound
+import ComputableReals.Computable.InvSound
+import ComputableReals.Computable.Preservation
+import ComputableReals.Computable.Refinement
+import ComputableReals.Computable.SqrtSound
+import ComputableReals.Computable.TrigSound
+import ComputableReals.CRealAQ
+import ComputableReals.CRealAQBackendEquiv
+import ComputableReals.CRealAQOrder
+import ComputableReals.CRealCast
+import ComputableReals.CRealCCLOF
+import ComputableReals.CRealExp
+import ComputableReals.CRealExpKIndep
+import ComputableReals.CRealExpSmall
+import ComputableReals.CRealLog
+import ComputableReals.CRealPre2
+import ComputableReals.CRealPre2.Algebra
+import ComputableReals.CRealPre2.InvTranscendental
+import ComputableReals.CRealPre2.Order
+import ComputableReals.CRealPre2.PreBasics
+import ComputableReals.CRealPreDyadic
+import ComputableReals.CRealRealEquiv
+import ComputableReals.CRealRep
+import ComputableReals.CRealsFast
+import ComputableReals.CRealsFastBackend
+import ComputableReals.CRealsFastExamples
+import ComputableReals.CRealSigmoid
+import ComputableReals.CRealSqrt
+import ComputableReals.CRealSqrtQ
+import ComputableReals.Decision
+import ComputableReals.Examples
+import ComputableReals.FastComplex
+import ComputableReals.FastComplexExamples
+import ComputableReals.FastComplexMatrix
+import ComputableReals.FastComplexMatrixExamples
+import ComputableReals.SOTA
+
+/-!
+# ComputableReals
+
+Root module of the standalone computable-reals development.
+-/

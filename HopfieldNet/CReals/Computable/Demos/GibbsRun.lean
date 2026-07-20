@@ -3,7 +3,7 @@ Copyright (c) 2026 Michail Karatarakis. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Michail Karatarakis
 -/
-import HopfieldNet.CReals.Computable.FastLogistic
+import HopfieldNet.CReals.Computable.NNGibbs
 
 /-!
 # Demo: a multi-sweep Gibbs chain on a *trained* Hopfield/Boltzmann network
