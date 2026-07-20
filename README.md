@@ -11,7 +11,7 @@ lake exe cache get   # fetch Mathlib build artifacts (first time)
 lake build
 ```
 
-52 modules, ~15,700 lines, **zero `sorry`s**.
+53 modules, ~16,000 lines, **zero `sorry`s**.
 
 ## The three layers
 
@@ -126,6 +126,29 @@ Soundness is stated against the closed form rather than `c ^ (1/2 : ℂ)`
 deliberately — `cpow` unfolds through `Complex.log` and hence `arg`, neither
 of which is verified here (see **Known gaps**).
 
+### Logarithm and argument
+
+`Computable/LogArgSound.lean`. These were the last unverified functions, and
+both were blocked at the *real* layer — `FastReal.log?` and `FastReal.atan`
+run but carry no soundness theorems, and re-deriving them as series with
+error bounds would repeat the whole of `ExpSound`.
+
+They are instead certified as *inverses* of functions that are already
+verified, which needs no series analysis at all:
+
+> to prove `L ≤ log r ≤ H` it suffices to check `exp L ≤ r ≤ exp H`,
+> because `exp` is monotone.
+
+So the search for a bracket need not be verified — only the final check.
+`logBracket` inverts `expV`; `arctanBracket` inverts `tan = sinV / cosV`,
+phrased as `sin lo ≤ y · cos lo` so no division is needed; `argBracket`
+certifies `Complex.arg` on the right half-plane, where
+`arg z = arctan (im z / re z)`; and `logC_encloses` assembles the complex
+logarithm from the first and third via `Complex.log_re` / `log_im`. This is
+the same discipline as `unitaryUpTo`: an executable predicate whose `true`
+answer is a theorem, and which returns `false` rather than lying when it
+cannot certify.
+
 ### The refinement triangle
 
 `Computable/CComplexRefine.lean` relates the two models directly:
@@ -145,21 +168,19 @@ split, so results stay citable across both repositories.
 
 ## Known gaps
 
-**`arg` and the complex logarithm are not verified, and are blocked one
-layer down.** `FastComplex.arg?` and `log?` run, but neither has a soundness
-theorem, and neither can get one until the *real* layer does: `arg` needs a
-verified `atan2`, which needs a verified `Real.arctan`; `log z = log ‖z‖ +
-i · arg z` needs that plus a verified real logarithm. Neither
-`FastReal.atan` nor `FastReal.log?` carries a soundness theorem today, so
-this is a real-analysis gap rather than a complex one. Each is a development
-comparable in size to the existing `ExpSound` / `TrigSound` files. A cheaper
-route for the logarithm is to invert the already-verified `expV` by
-bisection, proving soundness from monotonicity of `Real.exp` via
-`Real.le_log_iff_exp_le`, which avoids a fresh series analysis entirely.
-
 **Precision monotonicity.** Nothing states that increasing precision shrinks
 a ball's radius; that needs engine-level convergence facts which do not
 exist yet. Structural congruence lemmas for `Encloses` are provided instead.
+
+**`arg` outside the right half-plane.** `argBracket` is stated for
+`re z > 0`, where the argument lies in `(-π/2, π/2)` and equals an
+arctangent. The other quadrants need the usual `±π` case split, which is
+mechanical but not yet written.
+
+**Bracket search.** The soundness theorems take the bracket endpoints as
+given, and the accompanying `#eval`s use hand-chosen dyadics. An automatic
+bisection that proposes endpoints would be convenient; it needs no proof,
+since correctness rests entirely on the certificate.
 
 **`CRealAQDyadicEquiv.lean`** is present but not imported by the root module:
 it arrived broken, its `Dyadic.ulp` and `pow_le_pow_of_le_left` bitrot is

@@ -36,6 +36,7 @@ import ComputableReals.Computable.FastLogistic
 import ComputableReals.Computable.FastMatrixSound
 import ComputableReals.Computable.GibbsSound
 import ComputableReals.Computable.InvSound
+import ComputableReals.Computable.LogArgSound
 import ComputableReals.Computable.Preservation
 import ComputableReals.Computable.Refinement
 import ComputableReals.Computable.SqrtComplexSound
